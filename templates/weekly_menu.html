@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Weekly Menu · MessMate{% endblock %}
+{% block body %}
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="side-label">{{ 'MESS MANAGER' if user['role'] == 'manager' else 'STUDENT PORTAL' }}</div>
+    {% if user['role'] == 'student' %}
+      <a class="side-link" href="{{ url_for('dashboard') }}"><span>⌂</span> Dashboard</a>
+    {% else %}
+      <a class="side-link" href="{{ url_for('manager_dashboard') }}"><span>⌂</span> Manager Home</a>
+    {% endif %}
+    <a class="side-link active" href="{{ url_for('weekly_menu') }}"><span>▦</span> Weekly Menu</a>
+    <a class="side-link" href="{{ url_for('profile') }}"><span>♙</span> My Profile</a>
+  </aside>
+  <main class="main-content">
+    <div class="page-heading"><div><div class="eyebrow">MENU VIEWER</div><h1>Weekly Mess Menu</h1><p class="muted">View the planned meals for the selected week.</p></div><div class="date-chip">📅 {{ week_start.strftime('%d %b') }} – {{ week_end.strftime('%d %b %Y') }}</div></div>
+    <div class="table-card">
+      <div class="table-top"><div><h2>Published menu</h2><p class="muted">Monday to Sunday · Three meals per day</p></div><span class="status-pill">Read only</span></div>
+      <div class="table-scroll"><table><thead><tr><th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th></tr></thead><tbody>
+        {% for row in menu_rows %}
+          <tr class="{% if row['is_today'] %}today-row{% endif %}"><td><strong>{{ row['day'] }}</strong><small class="date-cell">{{ row['date'] }}</small>{% if row['is_today'] %}<span class="today-tag">TODAY</span>{% endif %}</td>{% for meal in ('Breakfast','Lunch','Dinner') %}<td>{{ row['meals'][meal] }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody></table></div>
+      <p class="sample-notice">Demo data only. At integration, this page should retrieve published menu data from Person 2's module. Menu creation and voting are not implemented here.</p>
+    </div>
+  </main>
+</div>
+{% endblock %}

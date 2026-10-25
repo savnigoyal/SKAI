@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard · MessMate{% endblock %}
+{% block body %}
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="side-label">STUDENT PORTAL</div>
+    <a class="side-link active" href="{{ url_for('dashboard') }}"><span>⌂</span> Dashboard</a>
+    <a class="side-link" href="{{ url_for('weekly_menu') }}"><span>▦</span> Weekly Menu</a>
+    <a class="side-link" href="{{ url_for('profile') }}"><span>♙</span> My Profile</a>
+    <div class="side-help"><span class="help-icon">i</span><div><strong>Need help?</strong><small>Contact your mess administrator for account support.</small></div></div>
+  </aside>
+  <main class="main-content">
+    <div class="page-heading">
+      <div><div class="eyebrow">STUDENT DASHBOARD</div><h1>Welcome back, {{ user['full_name'].split()[0] }} <span class="wave">👋</span></h1><p class="muted">Here's your mess schedule for the week.</p></div>
+      <div class="date-chip">📅 {{ week_start.strftime('%d %b') }} – {{ week_end.strftime('%d %b %Y') }}</div>
+    </div>
+    <section class="stat-grid">
+      <article class="stat-card"><div class="stat-top"><span class="stat-icon teal">☀</span><span class="stat-caption">TODAY</span></div><h3>Today's meals</h3><p class="stat-value">3 <small>meal slots</small></p><p class="stat-note">Breakfast, lunch and dinner</p></article>
+      <article class="stat-card"><div class="stat-top"><span class="stat-icon orange">◷</span><span class="stat-caption">THIS WEEK</span></div><h3>Weekly schedule</h3><p class="stat-value">7 <small>days</small></p><p class="stat-note">Plan ahead for your meals</p></article>
+      <article class="stat-card menu-card"><div class="stat-top"><span class="stat-icon blue">▦</span><span class="stat-caption">PUBLISHED MENU</span></div><h3>Weekly menu</h3><p class="stat-value">View menu</p><a class="inline-link" href="{{ url_for('weekly_menu') }}">Open full menu →</a></article>
+    </section>
+
+    <section class="section-block">
+      <div class="section-heading"><div><h2>Today's menu</h2><p class="muted">{{ today_row['day'] }}, {{ today_row['date'] }}</p></div><a class="inline-link" href="{{ url_for('weekly_menu') }}">View full week →</a></div>
+      <div class="meal-grid">
+        {% for meal, dish in today_row['meals'].items() %}
+          <article class="meal-card"><div class="meal-icon">{{ {'Breakfast':'☀','Lunch':'☼','Dinner':'☾'}[meal] }}</div><div><span class="meal-label">{{ meal }}</span><h3>{{ dish }}</h3></div></article>
+        {% endfor %}
+      </div>
+      <p class="sample-notice">Demo data: these meal names are illustrative until connected to the team's published-menu API.</p>
+    </section>
+
+    <section class="section-block announcement-panel"><div class="announcement-icon">i</div><div><h3>Welcome to MessMate</h3><p>Your account and published weekly menu are available here. Menu planning and voting, food reviews, and inventory features will be provided by their respective modules.</p></div></section>
+  </main>
+</div>
+{% endblock %}
