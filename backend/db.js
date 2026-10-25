@@ -6,17 +6,30 @@ const dotenv = require('dotenv');
 dotenv.config({ path: path.resolve(__dirname, '.env') });
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-const dbConfig = {
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '3306', 10),
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'hostel_mess_db',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    dateStrings: true
-};
+const isHosted = !!process.env.DATABASE_URL;
+const useSSL = process.env.DB_SSL === 'true' || (isHosted && process.env.DATABASE_URL.includes('ssl'));
+
+const dbConfig = isHosted
+    ? {
+        uri: process.env.DATABASE_URL,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        dateStrings: true,
+        ...(useSSL && { ssl: { rejectUnauthorized: false } })
+    }
+    : {
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.DB_PORT || '3306', 10),
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '',
+        database: process.env.DB_NAME || 'hostel_mess_db',
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        dateStrings: true,
+        ...(useSSL && { ssl: { rejectUnauthorized: false } })
+    };
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
