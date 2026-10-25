@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Manager Home · MessMate{% endblock %}
+{% block body %}
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="side-label">MANAGER PORTAL</div>
+    <a class="side-link active" href="{{ url_for('manager_dashboard') }}"><span>⌂</span> Manager Home</a>
+    <a class="side-link" href="{{ url_for('weekly_menu') }}"><span>▦</span> View Weekly Menu</a>
+    <a class="side-link" href="{{ url_for('profile') }}"><span>♙</span> My Profile</a>
+    <div class="side-help"><span class="help-icon">i</span><div><strong>Module access</strong><small>Menu, reviews and inventory tools are developed in separate modules.</small></div></div>
+  </aside>
+  <main class="main-content">
+    <div class="page-heading"><div><div class="eyebrow">MANAGER PORTAL</div><h1>Welcome, {{ user['full_name'].split()[0] }}</h1><p class="muted">Your account is authenticated with the Mess Manager role.</p></div><div class="date-chip">🔐 Manager access</div></div>
+    <section class="manager-welcome"><div class="large-icon">✓</div><div><h2>You're signed in as Mess Manager</h2><p>This starter demonstrates authentication and role protection. Menu planning, voting results, quality analytics, and inventory operations should be integrated from the respective team modules.</p><a class="button button-primary" href="{{ url_for('weekly_menu') }}">View sample menu →</a></div></section>
+  </main>
+</div>
+{% endblock %}

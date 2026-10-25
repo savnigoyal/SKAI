@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Sign in · MessMate{% endblock %}
+{% block body %}
+<main class="login-layout">
+  <section class="login-intro">
+    <div class="eyebrow">YOUR MESS, MORE TRANSPARENT</div>
+    <h1>A better mess experience starts here.</h1>
+    <p>See the published weekly menu, keep your account details together, and stay connected with your hostel mess.</p>
+    <div class="intro-feature"><span>✓</span> Weekly menu at a glance</div>
+    <div class="intro-feature"><span>✓</span> Secure, role-based access</div>
+    <div class="intro-feature"><span>✓</span> One place for your mess account</div>
+  </section>
+  <section class="login-card">
+    <div class="card-kicker">WELCOME BACK</div>
+    <h2>Sign in to MessMate</h2>
+    <p class="muted">Choose your account type to continue.</p>
+    <form method="post" action="{{ url_for('login') }}" class="form-stack">
+      <label>Account type</label>
+      <div class="role-select">
+        <label class="role-choice"><input type="radio" name="role" value="student" {% if selected_role != 'manager' %}checked{% endif %}><span>🎓 Student</span></label>
+        <label class="role-choice"><input type="radio" name="role" value="manager" {% if selected_role == 'manager' %}checked{% endif %}><span>🧑‍🍳 Mess Manager</span></label>
+      </div>
+      <label for="identifier">Email or Student ID</label>
+      <input id="identifier" name="identifier" type="text" autocomplete="username" placeholder="you@example.com or STU1001" required value="{{ request.form.get('identifier', '') }}">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required>
+      <button class="button button-primary full-width" type="submit">Sign in <span aria-hidden="true">→</span></button>
+    </form>
+    <p class="login-note">Accounts are provisioned by the project manager. Public registration is disabled in this prototype.</p>
+    <div class="demo-note"><strong>Local demo accounts</strong><br>Student: student@example.com / Student@123<br>Manager: manager@example.com / Manager@123</div>
+  </section>
+</main>
+{% endblock %}

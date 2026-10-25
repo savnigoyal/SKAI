@@ -1,5 +1,23 @@
+<<<<<<< HEAD
 node_modules/
 playwright-report/
 test-results/
 .env
 mess_data.db-journal
+=======
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local database and secrets
+instance/
+.env
+
+# Editors / OS
+.vscode/
+.DS_Store
+Thumbs.db
+>>>>>>> d348c6f17605b7a27ebf34c05749081309c0ea3c

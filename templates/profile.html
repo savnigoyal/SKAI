@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}My Profile · MessMate{% endblock %}
+{% block body %}
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="side-label">{{ 'MESS MANAGER' if user['role'] == 'manager' else 'STUDENT PORTAL' }}</div>
+    {% if user['role'] == 'student' %}<a class="side-link" href="{{ url_for('dashboard') }}"><span>⌂</span> Dashboard</a>{% else %}<a class="side-link" href="{{ url_for('manager_dashboard') }}"><span>⌂</span> Manager Home</a>{% endif %}
+    <a class="side-link" href="{{ url_for('weekly_menu') }}"><span>▦</span> Weekly Menu</a>
+    <a class="side-link active" href="{{ url_for('profile') }}"><span>♙</span> My Profile</a>
+  </aside>
+  <main class="main-content">
+    <div class="page-heading"><div><div class="eyebrow">ACCOUNT</div><h1>My Profile</h1><p class="muted">Your basic account information.</p></div></div>
+    <section class="profile-card">
+      <div class="profile-hero"><span class="profile-avatar">{{ user['full_name'][0]|upper }}</span><div><h2>{{ user['full_name'] }}</h2><p>{{ user['email'] }}</p><span class="role-pill">{{ 'Mess Manager' if user['role'] == 'manager' else 'Student' }}</span></div></div>
+      <div class="profile-fields">
+        <div><span>Full name</span><strong>{{ user['full_name'] }}</strong></div>
+        <div><span>Email</span><strong>{{ user['email'] }}</strong></div>
+        <div><span>Account role</span><strong>{{ 'Mess Manager' if user['role'] == 'manager' else 'Student' }}</strong></div>
+        <div><span>Student ID</span><strong>{{ user['student_id'] or 'Not applicable' }}</strong></div>
+        <div><span>Room number</span><strong>{{ user['room_no'] or 'Not provided' }}</strong></div>
+        <div><span>Hostel block</span><strong>{{ user['hostel_block'] or 'Not provided' }}</strong></div>
+      </div>
+      <p class="sample-notice">Profile editing is not enabled in this initial prototype.</p>
+    </section>
+  </main>
+</div>
+{% endblock %}
