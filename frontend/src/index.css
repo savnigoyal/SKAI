@@ -227,3 +227,30 @@ h1, h2, h3, h4, p { margin-top: 0; }
 	.editor-header, .editor-body { padding-right: 15px; padding-left: 15px; }
 	.editor-footer { padding-right: 15px; padding-left: 15px; }
 }
+
+/* Filter Toolbar & Pill Buttons */
+.pill-filter-btn {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--border-light);
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pill-filter-btn:hover {
+  background: var(--bg-sage-subtle);
+  color: var(--primary-green);
+  border-color: var(--primary-border);
+}
+
+.pill-filter-btn.active {
+  background: var(--primary-green);
+  color: #ffffff;
+  border-color: var(--primary-green);
+  box-shadow: 0 2px 6px rgba(27, 94, 68, 0.25);
+}
