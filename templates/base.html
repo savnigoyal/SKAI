@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Hostel Mess Management{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}"><span class="brand-icon">🍽</span><span>MESS<span class="brand-light">MATE</span><small>HOSTEL MESS MANAGEMENT</small></span></a>
+    {% if user is defined and user %}
+      <div class="top-actions">
+        <span class="role-pill">{{ 'Mess Manager' if user['role'] == 'manager' else 'Student' }}</span>
+        <a class="user-link" href="{{ url_for('profile') }}"><span class="avatar">{{ user['full_name'][0]|upper }}</span><span>{{ user['full_name'] }}</span></a>
+        <form method="post" action="{{ url_for('logout') }}"><button class="logout-button" type="submit">Log out</button></form>
+      </div>
+    {% endif %}
+  </header>
+
+  <div class="flash-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  {% block body %}{% endblock %}
+  <footer class="footer">Hostel Mess Management System <span>•</span> Student Portal prototype</footer>
+</body>
+</html>
