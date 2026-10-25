@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import StarRating from '../components/StarRating';
 import { fetchReviews } from '../services/reviewService';
+import { DEMO_REVIEWS } from '../services/mockData';
 
-export default function ManagerReviews() {
+export default function ManagerReviews({ isDemoMode = false }) {
   const [reviews, setReviews] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [usingFallbackDemo, setUsingFallbackDemo] = useState(false);
 
   // Filters
   const [mealFilter, setMealFilter] = useState('');
@@ -16,6 +18,15 @@ export default function ManagerReviews() {
   const loadReviews = async () => {
     setLoading(true);
     setError('');
+
+    // If explicit Demo Mode is ON
+    if (isDemoMode) {
+      filterDemoReviews();
+      setUsingFallbackDemo(false);
+      setLoading(false);
+      return;
+    }
+
     try {
       const filters = {};
       if (mealFilter) filters.meal_type = mealFilter;
@@ -25,16 +36,29 @@ export default function ManagerReviews() {
       const res = await fetchReviews(filters);
       setReviews(res.reviews || []);
       setTotal(res.total || 0);
+      setUsingFallbackDemo(false);
     } catch (err) {
-      setError(err.message || 'Failed to load reviews.');
+      console.warn('Backend database unreachable, displaying sample demo reviews:', err.message);
+      // Fallback to sample demo reviews
+      filterDemoReviews();
+      setUsingFallbackDemo(true);
     } finally {
       setLoading(false);
     }
   };
 
+  const filterDemoReviews = () => {
+    let list = [...DEMO_REVIEWS];
+    if (mealFilter) list = list.filter(r => r.meal_type === mealFilter);
+    if (ratingFilter) list = list.filter(r => r.rating === Number(ratingFilter));
+    if (dateFilter) list = list.filter(r => r.review_date === dateFilter);
+    setReviews(list);
+    setTotal(list.length);
+  };
+
   useEffect(() => {
     loadReviews();
-  }, [mealFilter, ratingFilter, dateFilter]);
+  }, [isDemoMode, mealFilter, ratingFilter, dateFilter]);
 
   return (
     <div className="manager-reviews-page" data-testid="manager-reviews-page">
@@ -51,6 +75,40 @@ export default function ManagerReviews() {
           ↻ Refresh
         </button>
       </div>
+
+      {/* Demo / Sample Data Notice Banner */}
+      {(isDemoMode || usingFallbackDemo) && (
+        <div
+          style={{
+            background: '#FEF3C7',
+            border: '1.5px solid #FCD34D',
+            borderRadius: 'var(--radius-md)',
+            padding: '12px 18px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.3rem' }}>🧪</span>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#92400E' }}>
+                Sample Demo Data Active
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#B45309' }}>
+                {usingFallbackDemo 
+                  ? 'Database is offline; displaying realistic sample student reviews for demonstration.'
+                  : 'Demonstrating manager reviews feed with realistic student sample reviews.'}
+              </div>
+            </div>
+          </div>
+          <span style={{ fontSize: '0.72rem', background: '#92400E', color: '#FFFFFF', padding: '3px 10px', borderRadius: '999px', fontWeight: 700 }}>
+            DEMO DATA
+          </span>
+        </div>
+      )}
 
       {/* Filter Bar */}
       <div className="reviews-filter-bar">
@@ -123,7 +181,7 @@ export default function ManagerReviews() {
       </div>
 
       {/* Error state */}
-      {error && (
+      {error && !usingFallbackDemo && (
         <div className="alert-box error">
           <span>⚠ {error}</span>
         </div>
