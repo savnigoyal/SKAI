@@ -89,4 +89,16 @@ test.describe('Hostel Mess Management - Food Reviews & Quality Analytics (Savni 
     await page.getByTestId('filter-last-30-days').click();
     await expect(page.getByTestId('filter-last-30-days')).toHaveClass(/active/);
   });
+
+  test('should navigate to Student Dashboard preview and display menu and voting', async ({ page }) => {
+    await page.getByTestId('nav-student-dashboard').click();
+    await expect(page.locator('h1')).toContainText('Good Morning, Ananya');
+    await expect(page.locator('.card-title').first()).toHaveText("Today's Menu");
+  });
+
+  test('should navigate to Manager Overview preview and display stats and charts', async ({ page }) => {
+    await page.getByTestId('nav-manager-dashboard').click();
+    await expect(page.locator('h1')).toContainText('Welcome, Mess Manager');
+    await expect(page.locator('.stat-card')).toHaveCount(4);
+  });
 });

@@ -7,8 +7,13 @@ import {
   fetchRecentFeedback,
   fetchQualityAlerts
 } from '../services/reviewService';
+import {
+  DEMO_REVIEWS,
+  calculateDemoAnalytics,
+  calculateDemoMealComparison
+} from '../services/mockData';
 
-export default function QualityAnalytics() {
+export default function QualityAnalytics({ isDemoMode = false }) {
   // Filter state: '7', '30', or 'custom'
   const [filterType, setFilterType] = useState('7');
   const [customStart, setCustomStart] = useState('');
@@ -25,6 +30,7 @@ export default function QualityAnalytics() {
   // UI state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [usingFallbackDemo, setUsingFallbackDemo] = useState(false);
 
   // Apply preset filter
   const handlePresetChange = (days) => {
@@ -47,10 +53,86 @@ export default function QualityAnalytics() {
     setAppliedFilters({ startDate: customStart, endDate: customEnd });
   };
 
-  // Fetch all analytics data based on active filters
+  // Filter demo reviews locally based on appliedFilters
+  const getFilteredDemoData = useCallback(() => {
+    let filtered = [...DEMO_REVIEWS];
+    if (appliedFilters.days === 7) {
+      filtered = DEMO_REVIEWS.slice(0, 26); // last 7 days
+    } else if (appliedFilters.days === 30) {
+      filtered = DEMO_REVIEWS; // full 30 days
+    } else if (appliedFilters.startDate && appliedFilters.endDate) {
+      filtered = DEMO_REVIEWS.filter(r => r.review_date >= appliedFilters.startDate && r.review_date <= appliedFilters.endDate);
+    }
+
+    const calculatedSummary = calculateDemoAnalytics(filtered);
+    const calculatedMeals = calculateDemoMealComparison(filtered).meals;
+
+    // Daily trend aggregation
+    const trendMap = {};
+    filtered.forEach(r => {
+      if (!trendMap[r.review_date]) {
+        trendMap[r.review_date] = { sum: 0, count: 0 };
+      }
+      trendMap[r.review_date].sum += r.rating;
+      trendMap[r.review_date].count += 1;
+    });
+
+    const calculatedTrends = Object.keys(trendMap).sort().map(d => {
+      const dateObj = new Date(d + 'T00:00:00');
+      const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+      return {
+        date: d,
+        day: weekday,
+        avgRating: Number((trendMap[d].sum / trendMap[d].count).toFixed(1)),
+        reviewCount: trendMap[d].count
+      };
+    });
+
+    // Quality alerts (< 3.0 stars)
+    const alertList = [];
+    const mealDateMap = {};
+    filtered.forEach(r => {
+      const k = `${r.review_date}_${r.meal_type}`;
+      if (!mealDateMap[k]) mealDateMap[k] = { sum: 0, count: 0, meal: r.meal_type, date: r.review_date };
+      mealDateMap[k].sum += r.rating;
+      mealDateMap[k].count += 1;
+    });
+
+    Object.values(mealDateMap).forEach(v => {
+      const avg = Number((v.sum / v.count).toFixed(1));
+      if (avg < 3.0 && v.count >= 2) {
+        alertList.push({ review_date: v.date, meal_type: v.meal, avg_rating: avg, review_count: v.count });
+      }
+    });
+
+    return {
+      summary: calculatedSummary,
+      trends: calculatedTrends,
+      meals: calculatedMeals,
+      feedback: filtered.filter(r => r.comment).slice(0, 6),
+      alerts: alertList
+    };
+  }, [appliedFilters]);
+
+  // Load analytics data
   const loadAnalytics = useCallback(async () => {
     setLoading(true);
     setError(null);
+
+    // If explicit demo mode is enabled, compute from realistic sample data
+    if (isDemoMode) {
+      const demoResult = getFilteredDemoData();
+      setSummary(demoResult.summary);
+      setTrends(demoResult.trends);
+      setMealComparison(demoResult.meals);
+      setRecentFeedback(demoResult.feedback);
+      setAlerts(demoResult.alerts);
+      setUsingFallbackDemo(false);
+      setLoading(false);
+      return;
+    }
+
+    // Try fetching from live database API
     try {
       const [sumRes, trendRes, mealRes, feedRes, alertRes] = await Promise.all([
         fetchAnalyticsSummary(appliedFilters),
@@ -65,13 +147,21 @@ export default function QualityAnalytics() {
       setMealComparison(mealRes.meals || []);
       setRecentFeedback(feedRes.feedback || []);
       setAlerts(alertRes.alerts || []);
+      setUsingFallbackDemo(false);
     } catch (err) {
-      console.error('Failed to load analytics:', err);
-      setError(err.message || 'Unable to connect to analytics service. Please verify backend is running.');
+      console.warn('Backend database not reachable, falling back to realistic sample data:', err.message);
+      // Graceful fallback to demo data so the user can test the UI without MySQL running
+      const demoResult = getFilteredDemoData();
+      setSummary(demoResult.summary);
+      setTrends(demoResult.trends);
+      setMealComparison(demoResult.meals);
+      setRecentFeedback(demoResult.feedback);
+      setAlerts(demoResult.alerts);
+      setUsingFallbackDemo(true);
     } finally {
       setLoading(false);
     }
-  }, [appliedFilters]);
+  }, [isDemoMode, appliedFilters, getFilteredDemoData]);
 
   useEffect(() => {
     loadAnalytics();
@@ -82,7 +172,7 @@ export default function QualityAnalytics() {
 
   return (
     <div className="quality-analytics-page" data-testid="quality-analytics-page">
-      {/* Header */}
+      {/* Top Header */}
       <div className="top-header">
         <div className="module-header">
           <h1>Food Quality Analytics</h1>
@@ -94,11 +184,45 @@ export default function QualityAnalytics() {
           style={{ padding: '8px 18px', fontSize: '0.85rem' }}
           onClick={loadAnalytics}
           disabled={loading}
-          title="Refresh metrics from database"
+          title="Refresh metrics"
         >
           {loading ? 'Refreshing...' : '↻ Refresh Data'}
         </button>
       </div>
+
+      {/* Demo / Sample Data Notice Banner */}
+      {(isDemoMode || usingFallbackDemo) && (
+        <div
+          style={{
+            background: '#FEF3C7',
+            border: '1.5px solid #FCD34D',
+            borderRadius: 'var(--radius-md)',
+            padding: '12px 18px',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px'
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '1.3rem' }}>🧪</span>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#92400E' }}>
+                Sample Demo Data Active
+              </div>
+              <div style={{ fontSize: '0.8rem', color: '#B45309' }}>
+                {usingFallbackDemo
+                  ? 'MySQL database is currently offline; displaying calculated metrics from 31 realistic sample reviews.'
+                  : 'Demonstrating analytics with 31 realistic student reviews calculated across breakfast, lunch, and dinner.'}
+              </div>
+            </div>
+          </div>
+          <span style={{ fontSize: '0.72rem', background: '#92400E', color: '#FFFFFF', padding: '3px 10px', borderRadius: '999px', fontWeight: 700 }}>
+            DEMO DATA
+          </span>
+        </div>
+      )}
 
       {/* Date Range Filter Bar */}
       <div className="analytics-filter-toolbar card" style={{ padding: '16px 20px', marginBottom: '24px' }}>
@@ -214,7 +338,7 @@ export default function QualityAnalytics() {
               <div className="stat-icon amber">★</div>
               <div>
                 <div className="stat-value">{avgRating > 0 ? avgRating.toFixed(1) : '—'}</div>
-                <div className="stat-label">Average Rating</div>
+                <div className="stat-label">Average Student Rating</div>
               </div>
             </div>
 

@@ -17,6 +17,12 @@ import {
   Utensils,
   X,
 } from 'lucide-react';
+import FoodReview from './pages/FoodReview';
+import ManagerReviews from './pages/ManagerReviews';
+import QualityAnalytics from './pages/QualityAnalytics';
+import StudentDashboardPreview from './components/StudentDashboardPreview';
+import ManagerDashboardPreview from './components/ManagerDashboardPreview';
+import { DEMO_STUDENT } from './services/mockData';
 
 const MEALS = [
   { id: 'breakfast', label: 'Breakfast', time: '7:30 - 9:30 AM', icon: Coffee },
@@ -40,11 +46,15 @@ const SAMPLES = {
 };
 const STORAGE_KEY = 'skai.weekly-menu.v1';
 const NAV_ITEMS = [
-  { label: 'Dashboard', icon: LayoutDashboard },
+  { label: "Rate Today's Food", icon: Coffee, testId: 'nav-rate-food' },
+  { label: 'Student Dashboard', icon: LayoutDashboard, testId: 'nav-student-dashboard' },
   { label: 'Weekly Menu', icon: CalendarDays },
-  { label: 'Menu Items', icon: Utensils },
+  { label: 'Quality Analytics', icon: LayoutDashboard, testId: 'nav-analytics' },
+  { label: 'Student Food Reviews', icon: FilePenLine, testId: 'nav-manager-reviews' },
+  { label: 'Manager Overview', icon: LayoutDashboard, testId: 'nav-manager-dashboard' },
+  { label: 'Menu Items', icon: Utensils, soon: true },
   { label: 'Voting Results', icon: CircleHelp, soon: true },
-  { label: 'Settings', icon: Settings },
+  { label: 'Settings', icon: Settings, soon: true },
 ];
 
 function mondayOf(date) {
@@ -97,9 +107,10 @@ function App() {
   const [editingMeal, setEditingMeal] = useState(null);
   const [mealDraft, setMealDraft] = useState(null);
   const [notice, setNotice] = useState(null);
-  const [activeNav, setActiveNav] = useState('Weekly Menu');
+  const [activeNav, setActiveNav] = useState("Rate Today's Food");
   const [publishConfirm, setPublishConfirm] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(true);
 
   const weekId = dateKey(weekStart);
   const currentMenu = menus[weekId] || makeWeek(weekStart, weekId === dateKey(mondayOf(new Date())));
@@ -201,11 +212,11 @@ function App() {
   }
 
   function handleNav(label, soon) {
-    setActiveNav(label);
-    if (label !== 'Weekly Menu') {
-      setNotice({ type: soon ? 'info' : 'info', text: soon ? 'Voting results will be available in a later phase.' : `${label} is outside this prototype. Weekly Menu remains available.` });
-      window.setTimeout(() => setActiveNav('Weekly Menu'), 2000);
+    if (soon) {
+      setNotice({ type: 'info', text: `${label} will be available in a later phase.` });
+      return;
     }
+    setActiveNav(label);
   }
 
   return (
@@ -215,10 +226,18 @@ function App() {
           <span className="brand-mark"><Leaf size={20} /></span>
           <span><strong>SKAI</strong><small>MESS MANAGEMENT</small></span>
         </a>
+        <button
+          onClick={() => setIsDemoMode((enabled) => !enabled)}
+          className={`nav-item ${isDemoMode ? 'active' : ''}`}
+          aria-pressed={isDemoMode}
+        >
+          <CircleHelp size={18} />
+          <span>{isDemoMode ? 'Demo Mode: ON' : 'Live DB Mode'}</span>
+        </button>
         <div className="nav-label">WORKSPACE</div>
         <nav aria-label="Main navigation">
-          {NAV_ITEMS.map(({ label, icon: Icon, soon }) => (
-            <button className={`nav-item ${activeNav === label ? 'active' : ''}`} key={label} onClick={() => { handleNav(label, soon); setMobileNavOpen(false); }}>
+          {NAV_ITEMS.map(({ label, icon: Icon, soon, testId }) => (
+            <button className={`nav-item ${activeNav === label ? 'active' : ''}`} key={label} data-testid={testId} onClick={() => { handleNav(label, soon); setMobileNavOpen(false); }}>
               <Icon size={18} strokeWidth={1.8} />
               <span>{label}</span>
               {soon && <span className="soon-tag">SOON</span>}
@@ -235,10 +254,12 @@ function App() {
       <main className="main-content" id="weekly-menu">
         <header className="mobile-header"><button className="icon-button" aria-label="Open navigation" aria-expanded={mobileNavOpen} onClick={() => setMobileNavOpen((open) => !open)}><MenuIcon size={20} /></button><strong>SKAI</strong><span>MESS MANAGEMENT</span></header>
         <div className="page-topline">
-          <div className="breadcrumbs">Mess Manager <span>/</span> <strong>Weekly Menu</strong></div>
-          <div className="topline-actions"><span className="local-indicator"><span /> Local preview</span><button className="icon-button" aria-label="Settings" onClick={() => handleNav('Settings', false)}><Settings size={18} /></button></div>
+          <div className="breadcrumbs">Mess Manager <span>/</span> <strong>{activeNav}</strong></div>
+          <div className="topline-actions"><span className="local-indicator"><span /> Local preview</span><button className="icon-button" aria-label="Settings" onClick={() => handleNav('Settings', true)}><Settings size={18} /></button></div>
         </div>
 
+        {activeNav === 'Weekly Menu' && (
+          <>
         <section className="page-heading">
           <div>
             <div className="eyebrow">MENU PLANNING</div>
@@ -279,6 +300,19 @@ function App() {
           </div>
           <p className="local-note"><CircleHelp size={15} /> Drafts and published status are stored in this browser only. Publishing here does not share the menu with students.</p>
         </section>
+          </>
+        )}
+
+        {activeNav === "Rate Today's Food" && <FoodReview student={DEMO_STUDENT} />}
+        {activeNav === 'Student Dashboard' && <StudentDashboardPreview onRateFoodClick={() => setActiveNav("Rate Today's Food")} />}
+        {activeNav === 'Quality Analytics' && <QualityAnalytics isDemoMode={isDemoMode} />}
+        {activeNav === 'Student Food Reviews' && <ManagerReviews isDemoMode={isDemoMode} />}
+        {activeNav === 'Manager Overview' && (
+          <ManagerDashboardPreview
+            onReviewsClick={() => setActiveNav('Student Food Reviews')}
+            onAnalyticsClick={() => setActiveNav('Quality Analytics')}
+          />
+        )}
       </main>
 
       {notice && <div className={`toast toast-${notice.type}`} role="status"><span>{notice.text}</span><button className="toast-close" aria-label="Dismiss message" onClick={() => setNotice(null)}><X size={15} /></button></div>}
