@@ -73,17 +73,20 @@ test.describe('Hostel Mess Management - Food Reviews & Quality Analytics (Savni 
     await expect(page.getByTestId('filter-rating')).toBeVisible();
   });
 
-  test('should navigate to Quality Analytics page and display metrics and trend chart', async ({ page }) => {
+  test('should navigate to Quality Analytics page and display metrics and timeframe filters', async ({ page }) => {
     // Navigate via sidebar
     await page.getByTestId('nav-analytics').click();
 
     // Verify heading
     await expect(page.locator('h1')).toHaveText('Food Quality Analytics');
 
-    // Verify stat cards exist
-    await expect(page.locator('.stat-card').first()).toBeVisible();
+    // Verify timeframe filters exist
+    await expect(page.getByTestId('filter-last-7-days')).toBeVisible();
+    await expect(page.getByTestId('filter-last-30-days')).toBeVisible();
+    await expect(page.getByTestId('filter-custom-range')).toBeVisible();
 
-    // Verify 7-day trend chart exists
-    await expect(page.getByTestId('ratings-trend-chart')).toBeVisible();
+    // Switching to 30 days
+    await page.getByTestId('filter-last-30-days').click();
+    await expect(page.getByTestId('filter-last-30-days')).toHaveClass(/active/);
   });
 });

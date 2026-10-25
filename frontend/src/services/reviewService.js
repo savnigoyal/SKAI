@@ -80,10 +80,25 @@ export async function fetchReviews(filters = {}) {
 }
 
 /**
+ * Helper to build date filter query string
+ */
+function buildAnalyticsParams(filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.days) params.append('days', filters.days);
+    if (filters.startDate) params.append('startDate', filters.startDate);
+    if (filters.endDate) params.append('endDate', filters.endDate);
+    if (filters.minReviews) params.append('min_reviews', filters.minReviews);
+    if (filters.limit) params.append('limit', filters.limit);
+    const qs = params.toString();
+    return qs ? `?${qs}` : '';
+}
+
+/**
  * Fetch overview analytics metrics (Avg rating, total reviews, meal breakdown, star distribution)
  */
-export async function fetchAnalyticsSummary() {
-    const response = await fetch(`${API_BASE_URL}/analytics/summary`);
+export async function fetchAnalyticsSummary(filters = {}) {
+    const qs = buildAnalyticsParams(filters);
+    const response = await fetch(`${API_BASE_URL}/analytics/summary${qs}`);
     const data = await response.json();
     if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch analytics summary');
@@ -92,11 +107,11 @@ export async function fetchAnalyticsSummary() {
 }
 
 /**
- * Fetch 7-day rating trends for manager ratings chart
- * @param {number} [days=7]
+ * Fetch rating trends for manager ratings chart
  */
-export async function fetchRatingTrends(days = 7) {
-    const response = await fetch(`${API_BASE_URL}/analytics/trends?days=${days}`);
+export async function fetchRatingTrends(filters = {}) {
+    const qs = buildAnalyticsParams(typeof filters === 'number' ? { days: filters } : filters);
+    const response = await fetch(`${API_BASE_URL}/analytics/trends${qs}`);
     const data = await response.json();
     if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch rating trends');
@@ -105,10 +120,37 @@ export async function fetchRatingTrends(days = 7) {
 }
 
 /**
- * Fetch low rating quality alerts (< 3.0 stars)
+ * Fetch comprehensive meal comparison for Breakfast, Lunch, and Dinner
  */
-export async function fetchQualityAlerts() {
-    const response = await fetch(`${API_BASE_URL}/analytics/alerts`);
+export async function fetchMealComparison(filters = {}) {
+    const qs = buildAnalyticsParams(filters);
+    const response = await fetch(`${API_BASE_URL}/analytics/meal-comparison${qs}`);
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch meal comparison');
+    }
+    return data; // { meals: [ { meal_type, total_reviews, avg_rating, positive_reviews, negative_reviews, satisfaction_rate } ] }
+}
+
+/**
+ * Fetch recent student reviews with feedback comments
+ */
+export async function fetchRecentFeedback(filters = {}) {
+    const qs = buildAnalyticsParams(filters);
+    const response = await fetch(`${API_BASE_URL}/analytics/recent-feedback${qs}`);
+    const data = await response.json();
+    if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch recent feedback');
+    }
+    return data; // { feedback: [ ... ] }
+}
+
+/**
+ * Fetch low rating quality alerts (< 3.0 stars) with minimum review threshold
+ */
+export async function fetchQualityAlerts(filters = {}) {
+    const qs = buildAnalyticsParams(filters);
+    const response = await fetch(`${API_BASE_URL}/analytics/alerts${qs}`);
     const data = await response.json();
     if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch quality alerts');
