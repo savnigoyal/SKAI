@@ -1,3 +1,8 @@
+import Login from "./pages/Login";
+import {
+  getCurrentUser,
+  logout,
+} from "./services/authService";
 import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
@@ -101,6 +106,33 @@ function getMealCompletion(meal) {
 }
 
 function App() {
+const [authUser, setAuthUser] = useState(null);
+const [authChecked, setAuthChecked] = useState(false);
+
+useEffect(() => {
+  let cancelled = false;
+
+  getCurrentUser()
+    .then((user) => {
+      if (!cancelled) {
+        setAuthUser(user);
+      }
+    })
+    .catch(() => {
+      if (!cancelled) {
+        setAuthUser(null);
+      }
+    })
+    .finally(() => {
+      if (!cancelled) {
+        setAuthChecked(true);
+      }
+    });
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
   const [weekStart, setWeekStart] = useState(() => mondayOf(new Date()));
   const [menus, setMenus] = useState(loadMenus);
   const [selectedDay, setSelectedDay] = useState(DAYS[0]);
@@ -218,7 +250,63 @@ function App() {
     }
     setActiveNav(label);
   }
+  async function handleLogout() {
+  try {
+    await logout();
+    setAuthUser(null);
+    setActiveNav("Student Dashboard");
+  } catch (error) {
+    setNotice({
+      type: "error",
+      text: error.message || "Unable to log out. Please try again.",
+    });
+  }
+}
+  const visibleNavItems = NAV_ITEMS
+  .filter(({ label }) => {
+    if (authUser?.role === "student") {
+      return [
+        "Student Dashboard",
+        "Weekly Menu",
+        "Rate Today's Food",
+      ].includes(label);
+    }
 
+    return [
+      "Weekly Menu",
+      "Quality Analytics",
+      "Student Food Reviews",
+      "Manager Overview",
+      "Menu Items",
+      "Voting Results",
+      "Settings",
+    ].includes(label);
+  })
+  .map((item) => ({
+    ...item,
+    target:
+      authUser?.role === "student" && item.label === "Weekly Menu"
+        ? "Student Weekly Menu"
+        : item.label,
+  }));
+if (!authChecked) {
+  return <div>Checking your session...</div>;
+}
+
+if (!authUser) {
+  return (
+    <Login
+      onLoginSuccess={(user) => {
+        setAuthUser(user);
+        setActiveNav(
+          user.role === "student"
+            ? "Student Dashboard"
+            : "Manager Overview"
+        );
+      }}
+    />
+  );
+}
   return (
     <div className="app-shell">
       <aside className={`sidebar ${mobileNavOpen ? 'sidebar-open' : ''}`}>
@@ -236,8 +324,11 @@ function App() {
         </button>
         <div className="nav-label">WORKSPACE</div>
         <nav aria-label="Main navigation">
-          {NAV_ITEMS.map(({ label, icon: Icon, soon, testId }) => (
-            <button className={`nav-item ${activeNav === label ? 'active' : ''}`} key={label} data-testid={testId} onClick={() => { handleNav(label, soon); setMobileNavOpen(false); }}>
+          {visibleNavItems.map(({ label, icon: Icon, soon, testId, target }) => (
+            <button className={`nav-item ${activeNav === label ? 'active' : ''}`} key={label} data-testid={testId} onClick={() => {
+  handleNav(target || label, soon);
+  setMobileNavOpen(false);
+}}>
               <Icon size={18} strokeWidth={1.8} />
               <span>{label}</span>
               {soon && <span className="soon-tag">SOON</span>}
@@ -245,10 +336,25 @@ function App() {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <span className="manager-avatar">M</span>
-          <span className="manager-meta"><strong>Mess Manager</strong><small>Administrator</small></span>
-          <ChevronDown size={16} />
-        </div>
+  <span className="manager-avatar">
+    {(authUser?.name || "U").charAt(0).toUpperCase()}
+  </span>
+
+  <span className="manager-meta">
+    <strong>{authUser?.name || "User"}</strong>
+    <small>
+      {authUser?.role === "student" ? "Student" : "Mess Manager"}
+    </small>
+  </span>
+
+  <button
+    type="button"
+    className="button button-secondary"
+    onClick={handleLogout}
+  >
+    Log out
+  </button>
+</div>
       </aside>
 
       <main className="main-content" id="weekly-menu">
@@ -302,7 +408,171 @@ function App() {
         </section>
           </>
         )}
+{activeNav === 'Student Weekly Menu' && (
+  <>
+    <section className="page-heading">
+      <div>
+        <div className="eyebrow">STUDENT PORTAL</div>
+        <h1>Weekly Menu</h1>
+        <p>View the published meals for each day.</p>
+      </div>
 
+      <div className="week-tools">
+        <div className="week-picker">
+          <button
+            className="icon-button"
+            aria-label="Previous week"
+            onClick={() => moveWeek(-1)}
+          >
+            <ArrowLeft size={17} />
+          </button>
+
+          <div>
+            <span className="week-caption">MENU FOR</span>
+            <strong>
+              {formatDate(weekStart)} – {formatDate(weekEnd)}, {weekEnd.getFullYear()}
+            </strong>
+          </div>
+
+          <button
+            className="icon-button"
+            aria-label="Next week"
+            onClick={() => moveWeek(1)}
+          >
+            <ArrowRight size={17} />
+          </button>
+        </div>
+      </div>
+    </section>
+
+    {!currentMenu.published ? (
+      <section className="menu-section">
+        <div className="empty-category">
+          No published menu is available for this week.
+        </div>
+      </section>
+    ) : (
+      <section className="menu-section">
+        <div className="section-heading">
+          <div>
+            <h2>Published meals</h2>
+            <p>Select a day to view its meals.</p>
+          </div>
+
+          <span className="status-pill published">Published</span>
+        </div>
+
+        <div className="day-tabs" role="tablist" aria-label="Menu days">
+          {DAYS.map((day, index) => {
+            const dayDate = new Date(weekStart);
+            dayDate.setDate(dayDate.getDate() + index);
+
+            return (
+              <button
+                key={day}
+                role="tab"
+                aria-selected={selectedDay === day}
+                className={`day-tab ${selectedDay === day ? 'selected' : ''}`}
+                onClick={() => setSelectedDay(day)}
+              >
+                <span className="day-short">{day.slice(0, 3)}</span>
+                <strong>{dayDate.getDate()}</strong>
+                <small>{dayDate.toLocaleDateString('en', { month: 'short' })}</small>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="day-title">
+          <div>
+            <span className="day-kicker">
+              {formatDate(
+                new Date(
+                  weekStart.getFullYear(),
+                  weekStart.getMonth(),
+                  weekStart.getDate() + DAYS.indexOf(selectedDay)
+                )
+              )}
+            </span>
+            <h3>{selectedDay}</h3>
+          </div>
+        </div>
+
+        <div className="meal-grid">
+          {MEALS.map((meal) => {
+            const Icon = meal.icon;
+            const categories =
+              currentMenu.days[selectedDay]?.[meal.id] || [];
+
+            const items = categories.flatMap((category) =>
+              category.items
+                .filter((item) => item.name.trim())
+                .map((item) => ({
+                  ...item,
+                  category: category.name,
+                }))
+            );
+
+            return (
+              <article className="meal-card" key={meal.id}>
+                <div className="meal-card-top">
+                  <span className="meal-icon">
+                    <Icon size={17} />
+                  </span>
+                </div>
+
+                <div className="meal-title-row">
+                  <h4>{meal.label}</h4>
+                  <span className="meal-time">{meal.time}</span>
+                </div>
+
+                {items.length > 0 ? (
+                  <div className="meal-items">
+                    {items.map((item, index) => (
+                      <div
+                        className="meal-item"
+                        key={`${item.category}-${index}`}
+                      >
+                        <span className="item-dot" />
+                        <span>
+                          <strong>{item.name}</strong>
+                          <small>{item.category}</small>
+                          {item.description && <small>{item.description}</small>}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="meal-empty">
+                    <span className="empty-icon">
+                      <Utensils size={16} />
+                    </span>
+                    <span>
+                      <strong>No menu available</strong>
+                      <small>Check again later.</small>
+                    </span>
+                  </div>
+                )}
+
+                <div className="meal-card-footer">
+                  <span>{items.length} {items.length === 1 ? 'item' : 'items'}</span>
+                  <span className={items.length ? 'planned-badge' : 'empty-badge'}>
+                    {items.length ? 'Available' : 'Empty'}
+                  </span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <p className="local-note">
+          This view currently uses the local demo menu data. It will need to
+          retrieve published menus from the shared menu API for final integration.
+        </p>
+      </section>
+    )}
+  </>
+)}
         {activeNav === "Rate Today's Food" && <FoodReview student={DEMO_STUDENT} />}
         {activeNav === 'Student Dashboard' && <StudentDashboardPreview onRateFoodClick={() => setActiveNav("Rate Today's Food")} />}
         {activeNav === 'Quality Analytics' && <QualityAnalytics isDemoMode={isDemoMode} />}

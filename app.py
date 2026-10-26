@@ -6,7 +6,11 @@ from datetime import date, datetime, timedelta
 from functools import wraps
 from pathlib import Path
 
-from flask import Flask, abort, flash, g, redirect, render_template, request, session, url_for
+from flask import (
+    Flask, abort, flash, g, jsonify, redirect,
+    render_template, request, session, url_for
+)
+from flask_cors import CORS
 from werkzeug.security import check_password_hash, generate_password_hash
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -17,6 +21,11 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(hours=8),
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
+)
+CORS(
+    app,
+    origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    supports_credentials=True
 )
 Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 DATABASE = os.environ.get("MESS_DATABASE_PATH", str(Path(app.instance_path) / "mess.db"))
@@ -234,8 +243,87 @@ def login():
 
     selected_role = request.form.get("role", "student") if request.method == "POST" else "student"
     return render_template("login.html", selected_role=selected_role)
+@app.get("/api/auth/me")
+def api_me():
+    user = current_user()
 
+    if not user:
+        return jsonify({
+            "error": {
+                "message": "Authentication required."
+            }
+        }), 401
 
+    return jsonify({
+        "data": {
+            "user": {
+                "id": user["id"],
+                "name": user["full_name"],
+                "email": user["email"],
+                "role": user["role"]
+            }
+        }
+    }), 200
+@app.post("/api/auth/login")
+def api_login():
+    data = request.get_json(silent=True) or {}
+
+    identifier = str(data.get("identifier", "")).strip()
+    password = data.get("password", "")
+    selected_role = str(data.get("role", "student")).lower()
+
+    if not identifier or not password:
+        return jsonify({
+            "error": {"message": "Identifier and password are required."}
+        }), 400
+
+    if selected_role not in ("student", "manager"):
+        return jsonify({
+            "error": {"message": "Invalid account type."}
+        }), 400
+
+    db = connect_db()
+    try:
+        user = db.execute(
+            "SELECT * FROM users WHERE email = ? OR student_id = ?",
+            (identifier, identifier)
+        ).fetchone()
+    finally:
+        db.close()
+
+    if (
+        not user
+        or not user["is_active"]
+        or not check_password_hash(user["password_hash"], password)
+        or user["role"] != selected_role
+    ):
+        log_auth_event(
+            user["id"] if user else None,
+            identifier,
+            "login",
+            False
+        )
+        return jsonify({
+            "error": {"message": "Unable to log in. Check your credentials."}
+        }), 401
+
+    log_auth_event(user["id"], identifier, "login", True)
+
+    session.clear()
+    session["user_id"] = user["id"]
+    session["role"] = user["role"]
+    session.permanent = True
+
+    return jsonify({
+        "data": {
+            "user": {
+                "id": user["id"],
+                "name": user["full_name"],
+                "email": user["email"],
+                "role": user["role"]
+            }
+        }
+    }), 200
 @app.post("/logout")
 @login_required
 def logout():
