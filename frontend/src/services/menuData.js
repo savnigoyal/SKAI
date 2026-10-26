@@ -6,7 +6,7 @@
 export const MEALS_CONFIG = [
   { id: 'breakfast', label: 'Breakfast', time: '7:30 - 9:30 AM', icon: '🍳', tone: 'amber' },
   { id: 'lunch', label: 'Lunch', time: '12:30 - 2:30 PM', icon: '🍛', tone: 'green' },
-  { id: 'highTea', label: 'High Tea', time: '4:30 - 5:30 PM', icon: '☕', tone: 'orange' },
+  { id: 'highTea', label: 'Hi Tea', time: '4:30 - 5:30 PM', icon: '☕', tone: 'orange' },
   { id: 'dinner', label: 'Dinner', time: '7:30 - 9:30 PM', icon: '🍽️', tone: 'purple' },
 ];
 
@@ -300,9 +300,9 @@ export function generateInitialVotingData() {
         { id: 'v-mon-l-3', name: 'Aloo Gobi with Roti', meal: 'Lunch', votes: 24, leading: false },
       ],
       highTea: [
-        { id: 'v-mon-h-1', name: 'Samosa', meal: 'High Tea', votes: 112, leading: true },
-        { id: 'v-mon-h-2', name: 'Bread Pakora', meal: 'High Tea', votes: 64, leading: false },
-        { id: 'v-mon-h-3', name: 'Bhel Puri', meal: 'High Tea', votes: 31, leading: false },
+        { id: 'v-mon-h-1', name: 'Samosa', meal: 'Hi Tea', votes: 112, leading: true },
+        { id: 'v-mon-h-2', name: 'Bread Pakora', meal: 'Hi Tea', votes: 64, leading: false },
+        { id: 'v-mon-h-3', name: 'Bhel Puri', meal: 'Hi Tea', votes: 31, leading: false },
       ],
       dinner: [
         { id: 'v-mon-d-1', name: 'Dal Fry with Jeera Rice', meal: 'Dinner', votes: 76, leading: true },
@@ -322,9 +322,9 @@ export function generateInitialVotingData() {
         { id: 'v-tue-l-3', name: 'Mix Veg with Roti', meal: 'Lunch', votes: 21, leading: false },
       ],
       highTea: [
-        { id: 'v-tue-h-1', name: 'French Fries', meal: 'High Tea', votes: 89, leading: true },
-        { id: 'v-tue-h-2', name: 'Aloo Tikki', meal: 'High Tea', votes: 52, leading: false },
-        { id: 'v-tue-h-3', name: 'Veg Sandwich', meal: 'High Tea', votes: 44, leading: false },
+        { id: 'v-tue-h-1', name: 'French Fries', meal: 'Hi Tea', votes: 89, leading: true },
+        { id: 'v-tue-h-2', name: 'Aloo Tikki', meal: 'Hi Tea', votes: 52, leading: false },
+        { id: 'v-tue-h-3', name: 'Veg Sandwich', meal: 'Hi Tea', votes: 44, leading: false },
       ],
       dinner: [
         { id: 'v-tue-d-1', name: 'Kadai Paneer', meal: 'Dinner', votes: 104, leading: true },
@@ -344,9 +344,9 @@ export function generateInitialVotingData() {
         { id: 'v-wed-l-3', name: 'Masala Khichdi with Curd', meal: 'Lunch', votes: 26, leading: false },
       ],
       highTea: [
-        { id: 'v-wed-h-1', name: 'Veg Momos', meal: 'High Tea', votes: 128, leading: true },
-        { id: 'v-wed-h-2', name: 'Chilli Potato', meal: 'High Tea', votes: 84, leading: false },
-        { id: 'v-wed-h-3', name: 'Dhokla', meal: 'High Tea', votes: 29, leading: false },
+        { id: 'v-wed-h-1', name: 'Veg Momos', meal: 'Hi Tea', votes: 128, leading: true },
+        { id: 'v-wed-h-2', name: 'Chilli Potato', meal: 'Hi Tea', votes: 84, leading: false },
+        { id: 'v-wed-h-3', name: 'Dhokla', meal: 'Hi Tea', votes: 29, leading: false },
       ],
       dinner: [
         { id: 'v-wed-d-1', name: 'Matar Paneer with Roti', meal: 'Dinner', votes: 79, leading: true },
@@ -366,9 +366,9 @@ export function generateInitialVotingData() {
         { id: 'v-thu-l-3', name: 'Dal Tadka with Rice', meal: 'Lunch', votes: 44, leading: false },
       ],
       highTea: [
-        { id: 'v-thu-h-1', name: 'Paneer Pakora', meal: 'High Tea', votes: 97, leading: true },
-        { id: 'v-thu-h-2', name: 'Kachori', meal: 'High Tea', votes: 61, leading: false },
-        { id: 'v-thu-h-3', name: 'Spring Rolls', meal: 'High Tea', votes: 54, leading: false },
+        { id: 'v-thu-h-1', name: 'Paneer Pakora', meal: 'Hi Tea', votes: 97, leading: true },
+        { id: 'v-thu-h-2', name: 'Kachori', meal: 'Hi Tea', votes: 61, leading: false },
+        { id: 'v-thu-h-3', name: 'Spring Rolls', meal: 'Hi Tea', votes: 54, leading: false },
       ],
       dinner: [
         { id: 'v-thu-d-1', name: 'Paneer Lababdar with Roti', meal: 'Dinner', votes: 115, leading: true },
@@ -388,9 +388,9 @@ export function generateInitialVotingData() {
         { id: 'v-fri-l-3', name: 'Veg Pulao with Raita', meal: 'Lunch', votes: 49, leading: false },
       ],
       highTea: [
-        { id: 'v-fri-h-1', name: 'Chilli Potato', meal: 'High Tea', votes: 106, leading: true },
-        { id: 'v-fri-h-2', name: 'Spring Rolls', meal: 'High Tea', votes: 82, leading: false },
-        { id: 'v-fri-h-3', name: 'Maggi', meal: 'High Tea', votes: 95, leading: false },
+        { id: 'v-fri-h-1', name: 'Chilli Potato', meal: 'Hi Tea', votes: 106, leading: true },
+        { id: 'v-fri-h-2', name: 'Spring Rolls', meal: 'Hi Tea', votes: 82, leading: false },
+        { id: 'v-fri-h-3', name: 'Maggi', meal: 'Hi Tea', votes: 95, leading: false },
       ],
       dinner: [
         { id: 'v-fri-d-1', name: 'Veg Manchurian with Fried Rice', meal: 'Dinner', votes: 142, leading: true },
@@ -410,9 +410,9 @@ export function generateInitialVotingData() {
         { id: 'v-sat-l-3', name: 'Shahi Paneer with Roti', meal: 'Lunch', votes: 64, leading: false },
       ],
       highTea: [
-        { id: 'v-sat-h-1', name: 'Maggi', meal: 'High Tea', votes: 130, leading: true },
-        { id: 'v-sat-h-2', name: 'Aloo Tikki', meal: 'High Tea', votes: 67, leading: false },
-        { id: 'v-sat-h-3', name: 'Bhel Puri', meal: 'High Tea', votes: 42, leading: false },
+        { id: 'v-sat-h-1', name: 'Maggi', meal: 'Hi Tea', votes: 130, leading: true },
+        { id: 'v-sat-h-2', name: 'Aloo Tikki', meal: 'Hi Tea', votes: 67, leading: false },
+        { id: 'v-sat-h-3', name: 'Bhel Puri', meal: 'Hi Tea', votes: 42, leading: false },
       ],
       dinner: [
         { id: 'v-sat-d-1', name: 'Dal Makhani with Naan', meal: 'Dinner', votes: 126, leading: true },
@@ -432,9 +432,9 @@ export function generateInitialVotingData() {
         { id: 'v-sun-l-3', name: 'Palak Paneer with Roti', meal: 'Lunch', votes: 53, leading: false },
       ],
       highTea: [
-        { id: 'v-sun-h-1', name: 'Pav Bhaji', meal: 'High Tea', votes: 119, leading: true },
-        { id: 'v-sun-h-2', name: 'Paneer Pakora', meal: 'High Tea', votes: 85, leading: false },
-        { id: 'v-sun-h-3', name: 'French Fries', meal: 'High Tea', votes: 72, leading: false },
+        { id: 'v-sun-h-1', name: 'Pav Bhaji', meal: 'Hi Tea', votes: 119, leading: true },
+        { id: 'v-sun-h-2', name: 'Paneer Pakora', meal: 'Hi Tea', votes: 85, leading: false },
+        { id: 'v-sun-h-3', name: 'French Fries', meal: 'Hi Tea', votes: 72, leading: false },
       ],
       dinner: [
         { id: 'v-sun-d-1', name: 'Palak Paneer with Roti', meal: 'Dinner', votes: 102, leading: true },

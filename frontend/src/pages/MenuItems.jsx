@@ -183,7 +183,7 @@ export default function MenuItems({
           <span className="summary-icon sage"><ChefHat size={18} /></span>
           <div className="summary-copy">
             <span>Categories Available</span>
-            <strong>Breakfast, Lunch, High Tea, Dinner</strong>
+            <strong>Breakfast, Lunch, Hi Tea, Dinner</strong>
             <small>15+ items per category</small>
           </div>
         </article>

@@ -45,7 +45,7 @@ import {
 const MEALS = [
   { id: 'breakfast', label: 'Breakfast', time: '7:30 - 9:30 AM', icon: Coffee },
   { id: 'lunch', label: 'Lunch', time: '12:30 - 2:30 PM', icon: Utensils },
-  { id: 'highTea', label: 'High Tea', time: '4:30 - 5:30 PM', icon: Clock3 },
+  { id: 'highTea', label: 'Hi Tea', time: '4:30 - 5:30 PM', icon: Clock3 },
   { id: 'dinner', label: 'Dinner', time: '7:30 - 9:30 PM', icon: Utensils },
 ];
 

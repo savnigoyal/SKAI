@@ -174,7 +174,7 @@ export default function StudentDashboardPreview({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <div>
               <h2 className="card-title" style={{ margin: 0, fontSize: '18px', color: '#273b30' }}>Full Weekly Mess Schedule</h2>
-              <p style={{ fontSize: '0.82rem', color: '#7a8c81', margin: '4px 0 0' }}>All 7 days across Breakfast, Lunch, High Tea, and Dinner</p>
+              <p style={{ fontSize: '0.82rem', color: '#7a8c81', margin: '4px 0 0' }}>All 7 days across Breakfast, Lunch, Hi Tea, and Dinner</p>
             </div>
             <button
               onClick={() => setActiveTab('voting')}
@@ -192,7 +192,7 @@ export default function StudentDashboardPreview({
                   <th style={{ padding: '12px 14px', borderRadius: '6px 0 0 6px', width: '12%' }}>Day</th>
                   <th style={{ padding: '12px 14px', width: '22%' }}>🍳 Breakfast</th>
                   <th style={{ padding: '12px 14px', width: '24%' }}>🍛 Lunch</th>
-                  <th style={{ padding: '12px 14px', width: '18%' }}>☕ High Tea</th>
+                  <th style={{ padding: '12px 14px', width: '18%' }}>☕ Hi Tea</th>
                   <th style={{ padding: '12px 14px', borderRadius: '0 6px 6px 0', width: '24%' }}>🍽️ Dinner</th>
                 </tr>
               </thead>

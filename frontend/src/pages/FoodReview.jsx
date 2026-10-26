@@ -5,14 +5,14 @@ import StarRating from '../components/StarRating';
 const MEAL_OPTIONS = [
   { id: 'Breakfast', label: 'Breakfast', emoji: '🍳', time: '7:30 – 9:30 AM' },
   { id: 'Lunch',     label: 'Lunch',     emoji: '🍛', time: '12:30 – 2:30 PM' },
-  { id: 'High Tea',  label: 'High Tea',  emoji: '☕', time: '4:30 – 5:30 PM' },
+  { id: 'Hi Tea',    label: 'Hi Tea',    emoji: '☕', time: '4:30 – 5:30 PM' },
   { id: 'Dinner',    label: 'Dinner',    emoji: '🌙', time: '7:30 – 9:30 PM' },
 ];
 
 const CATEGORIES = {
   Breakfast: ['Overall Taste', 'Freshness & Quality', 'Portion Size', 'Service Speed'],
   Lunch:     ['Overall Taste', 'Dal & Curry', 'Roti / Rice Quality', 'Portion Size'],
-  'High Tea':['Overall Taste', 'Snack Quality', 'Beverages'],
+  'Hi Tea':  ['Overall Taste', 'Snack Quality', 'Beverages'],
   Dinner:    ['Overall Taste', 'Dal & Curry', 'Roti / Rice Quality', 'Portion Size'],
 };
 
