@@ -1,31 +1,53 @@
 import React, { useState } from 'react';
-import { DEMO_STUDENT, DEMO_TODAYS_MENU, DEMO_WEEKLY_MENU, DEMO_VOTING_OPTIONS } from '../services/mockData';
+import { DEMO_STUDENT } from '../services/mockData';
+import { DAYS_CONFIG, MEALS_CONFIG, generateFullWeekSchedule } from '../services/menuData';
+import { Vote, Trophy, CheckCircle2, Calendar, Coffee, Utensils, Clock3 } from 'lucide-react';
 
-export default function StudentDashboardPreview({ onRateFoodClick }) {
-  const [votes, setVotes] = useState(DEMO_VOTING_OPTIONS);
-  const [selectedOption, setSelectedOption] = useState(2); // Aloo Paratha leading
-  const [hasVoted, setHasVoted] = useState(false);
+export default function StudentDashboardPreview({
+  onRateFoodClick,
+  votingData,
+  onCastVote,
+  onNavigateToVoting,
+  currentWeekMenu,
+}) {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'weekly' | 'voting' | 'profile'
+  const [selectedVoteDay, setSelectedVoteDay] = useState('Monday');
+  const [selectedVoteMeal, setSelectedVoteMeal] = useState('breakfast');
+  const [selectedOptionId, setSelectedOptionId] = useState(null);
+  const [userVotedSlots, setUserVotedSlots] = useState({}); // { 'Monday-breakfast': itemId }
 
-  const handleVote = (e) => {
+  // Current candidates for selected Day and Meal
+  const currentSlotKey = `${selectedVoteDay}-${selectedVoteMeal}`;
+  const candidates = votingData?.[selectedVoteDay]?.[selectedVoteMeal] || [];
+  const totalVotesInSlot = candidates.reduce((sum, item) => sum + item.votes, 0);
+  const hasVotedThisSlot = Boolean(userVotedSlots[currentSlotKey]);
+
+  const handleVoteSubmit = (e) => {
     e.preventDefault();
-    setVotes(prev => prev.map(opt => opt.id === selectedOption ? { ...opt, votes: opt.votes + 1 } : opt));
-    setHasVoted(true);
+    if (!selectedOptionId || hasVotedThisSlot) return;
+
+    if (onCastVote) {
+      onCastVote(selectedVoteDay, selectedVoteMeal, selectedOptionId);
+    }
+    setUserVotedSlots((prev) => ({ ...prev, [currentSlotKey]: selectedOptionId }));
   };
+
+  // 7-day schedule for table
+  const fullWeekDays = currentWeekMenu?.days || generateFullWeekSchedule();
 
   return (
     <div className="student-dashboard-preview" data-testid="student-dashboard-preview">
       {/* Top Welcome Greeting */}
-      <div className="top-header">
+      <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div className="module-header">
-          <h1>Good Morning, {DEMO_STUDENT.student_name.split(' ')[0]}! ☀️</h1>
-          <p>Hope you have a great day! Here is your mess schedule and updates.</p>
+          <h1 style={{ fontSize: '24px', fontWeight: 600, margin: '0 0 6px', color: '#1f3529' }}>Good Morning, {DEMO_STUDENT.student_name.split(' ')[0]}! ☀️</h1>
+          <p style={{ margin: 0, color: '#68776f', fontSize: '12px' }}>Welcome to SKAI Mess Portal. Check upcoming meals, vote for next specials, or review food.</p>
         </div>
 
         {/* Demo Data Badge */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <span style={{ fontSize: '0.75rem', background: '#FEF3C7', color: '#B45309', border: '1px solid #FDE68A', padding: '4px 12px', borderRadius: '999px', fontWeight: 700 }}>
-            Sample / Demo Data
+            Student Portal
           </span>
           <div className="profile-pill">
             <div className="avatar-circle">A</div>
@@ -37,19 +59,19 @@ export default function StudentDashboardPreview({ onRateFoodClick }) {
         </div>
       </div>
 
-      {/* Navigation Sub-tabs matching Reference Design */}
-      <div className="meal-tabs-container" style={{ marginBottom: '24px' }}>
-        <button className={`meal-tab-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
+      {/* Navigation Sub-tabs */}
+      <div className="meal-tabs-container" style={{ display: 'flex', gap: '10px', marginBottom: '24px', borderBottom: '1px solid #e2e8e0', paddingBottom: '12px' }}>
+        <button className={`pill-filter-btn ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>
           Dashboard Overview
         </button>
-        <button className={`meal-tab-btn ${activeTab === 'weekly' ? 'active' : ''}`} onClick={() => setActiveTab('weekly')}>
-          Weekly Menu
+        <button className={`pill-filter-btn ${activeTab === 'weekly' ? 'active' : ''}`} onClick={() => setActiveTab('weekly')}>
+          📅 Weekly Menu
         </button>
-        <button className={`meal-tab-btn ${activeTab === 'voting' ? 'active' : ''}`} onClick={() => setActiveTab('voting')}>
-          Vote for Menu
+        <button className={`pill-filter-btn ${activeTab === 'voting' ? 'active' : ''}`} onClick={() => setActiveTab('voting')}>
+          🗳️ Vote for Menu
         </button>
-        <button className={`meal-tab-btn ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
-          My Profile
+        <button className={`pill-filter-btn ${activeTab === 'profile' ? 'active' : ''}`} onClick={() => setActiveTab('profile')}>
+          👤 My Profile
         </button>
       </div>
 
@@ -57,37 +79,43 @@ export default function StudentDashboardPreview({ onRateFoodClick }) {
       {activeTab === 'overview' && (
         <>
           {/* Today's Menu Cards */}
-          <div className="card" style={{ marginBottom: '24px' }}>
+          <div className="card" style={{ marginBottom: '24px', background: '#fff', border: '1px solid #e6eae3', borderRadius: '9px', padding: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 className="card-title" style={{ margin: 0 }}>Today's Menu</h2>
-              <span style={{ fontSize: '0.82rem', color: 'var(--primary-green)', fontWeight: 600 }}>
-                📅 {DEMO_TODAYS_MENU.date}
+              <h2 className="card-title" style={{ margin: 0, fontSize: '17px', color: '#273b30' }}>Today's Planned Meals (Monday)</h2>
+              <span style={{ fontSize: '0.82rem', color: '#2f785b', fontWeight: 600 }}>
+                📅 Live Mess Service
               </span>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '18px' }}>
-              {['breakfast', 'lunch', 'dinner'].map((mealKey) => {
-                const meal = DEMO_TODAYS_MENU[mealKey];
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
+              {MEALS_CONFIG.map((m) => {
+                const dayMeal = fullWeekDays?.Monday?.[m.id];
+                const itemsList = dayMeal
+                  ? dayMeal.flatMap((cat) => cat.items.map((it) => it.name)).slice(0, 3).join(', ')
+                  : 'Menu planned';
+
                 return (
                   <div
-                    key={mealKey}
+                    key={m.id}
                     style={{
-                      background: 'var(--bg-soft-cream)',
-                      border: '1px solid var(--border-light)',
-                      borderRadius: 'var(--radius-md)',
-                      padding: '18px',
+                      background: '#f9faf7',
+                      border: '1px solid #e5eae2',
+                      borderRadius: '8px',
+                      padding: '14px',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '16px'
+                      gap: '12px',
                     }}
                   >
-                    <div style={{ fontSize: '2rem' }}>{meal.icon}</div>
+                    <div style={{ fontSize: '1.8rem', background: '#eef5ec', width: '44px', height: '44px', borderRadius: '8px', display: 'grid', placeItems: 'center' }}>
+                      {m.icon}
+                    </div>
                     <div>
-                      <div style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-muted)', fontWeight: 700 }}>
-                        {meal.title}
+                      <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#7a8c81', fontWeight: 700 }}>
+                        {m.label} ({m.time})
                       </div>
-                      <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', marginTop: '2px' }}>
-                        {meal.items}
+                      <div style={{ fontSize: '0.88rem', fontWeight: 650, color: '#273b30', marginTop: '3px' }}>
+                        {itemsList}
                       </div>
                     </div>
                   </div>
@@ -97,31 +125,43 @@ export default function StudentDashboardPreview({ onRateFoodClick }) {
           </div>
 
           {/* Quick Action Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-            <div className="card" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('weekly')}>
-              <div style={{ fontSize: '1.8rem', marginBottom: '10px' }}>📅</div>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '4px' }}>View Weekly Menu</h3>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Check upcoming meals for the week.</p>
-              <div style={{ marginTop: '14px', color: 'var(--primary-green)', fontWeight: 700, fontSize: '0.85rem' }}>
-                View schedule →
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
+            <div
+              className="card"
+              style={{ cursor: 'pointer', background: '#fff', border: '1px solid #e6eae3', borderRadius: '9px', padding: '18px' }}
+              onClick={() => setActiveTab('weekly')}
+            >
+              <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>📅</div>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 4px', color: '#273b30' }}>View Weekly Menu</h3>
+              <p style={{ fontSize: '0.8rem', color: '#6d7c73', margin: 0 }}>Check upcoming breakfast, lunch, high tea, and dinner.</p>
+              <div style={{ marginTop: '12px', color: '#2f785b', fontWeight: 700, fontSize: '0.82rem' }}>
+                Open schedule →
               </div>
             </div>
 
-            <div className="card" style={{ cursor: 'pointer' }} onClick={() => setActiveTab('voting')}>
-              <div style={{ fontSize: '1.8rem', marginBottom: '10px' }}>🗳️</div>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '4px' }}>Vote for Menu</h3>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Let your voice be heard for next week's specials.</p>
-              <div style={{ marginTop: '14px', color: 'var(--primary-green)', fontWeight: 700, fontSize: '0.85rem' }}>
-                Cast vote →
+            <div
+              className="card"
+              style={{ cursor: 'pointer', background: '#fff', border: '1px solid #e6eae3', borderRadius: '9px', padding: '18px' }}
+              onClick={() => setActiveTab('voting')}
+            >
+              <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>🗳️</div>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 4px', color: '#273b30' }}>Vote for Menu Items</h3>
+              <p style={{ fontSize: '0.8rem', color: '#6d7c73', margin: 0 }}>Cast your vote for everyday meal favorites.</p>
+              <div style={{ marginTop: '12px', color: '#2f785b', fontWeight: 700, fontSize: '0.82rem' }}>
+                Cast vote now →
               </div>
             </div>
 
-            <div className="card" style={{ cursor: 'pointer', borderColor: 'var(--primary-border)', background: 'var(--bg-sage-subtle)' }} onClick={onRateFoodClick}>
-              <div style={{ fontSize: '1.8rem', marginBottom: '10px' }}>⭐</div>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '4px' }}>Rate Today's Food</h3>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Share your feedback to help us improve.</p>
-              <div style={{ marginTop: '14px', color: 'var(--primary-green)', fontWeight: 700, fontSize: '0.85rem' }}>
-                Open Review Form →
+            <div
+              className="card"
+              style={{ cursor: 'pointer', background: '#eff6ef', border: '1.5px solid #a9d4b6', borderRadius: '9px', padding: '18px' }}
+              onClick={onRateFoodClick}
+            >
+              <div style={{ fontSize: '1.8rem', marginBottom: '8px' }}>⭐</div>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 4px', color: '#1e4835' }}>Rate Today's Food</h3>
+              <p style={{ fontSize: '0.8rem', color: '#4a6756', margin: 0 }}>Share feedback and rating for today's mess food.</p>
+              <div style={{ marginTop: '12px', color: '#1e4835', fontWeight: 700, fontSize: '0.82rem' }}>
+                Open review form →
               </div>
             </div>
           </div>
@@ -130,35 +170,51 @@ export default function StudentDashboardPreview({ onRateFoodClick }) {
 
       {/* 2. WEEKLY MENU TAB */}
       {activeTab === 'weekly' && (
-        <div className="card">
+        <div className="card" style={{ background: '#fff', border: '1px solid #e6eae3', borderRadius: '9px', padding: '22px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
             <div>
-              <h2 className="card-title" style={{ margin: 0 }}>Weekly Mess Menu</h2>
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Full schedule for 12 Aug – 18 Aug 2024</p>
+              <h2 className="card-title" style={{ margin: 0, fontSize: '18px', color: '#273b30' }}>Full Weekly Mess Schedule</h2>
+              <p style={{ fontSize: '0.82rem', color: '#7a8c81', margin: '4px 0 0' }}>All 7 days across Breakfast, Lunch, Hi Tea, and Dinner</p>
             </div>
+            <button
+              onClick={() => setActiveTab('voting')}
+              className="button button-primary"
+              style={{ fontSize: '11px' }}
+            >
+              Vote for Menu Specials →
+            </button>
           </div>
 
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
               <thead>
-                <tr style={{ background: 'var(--bg-sage-light)', color: 'var(--primary-green)' }}>
-                  <th style={{ padding: '12px 16px', borderRadius: '8px 0 0 8px' }}>Day</th>
-                  <th style={{ padding: '12px 16px' }}>Breakfast</th>
-                  <th style={{ padding: '12px 16px' }}>Lunch</th>
-                  <th style={{ padding: '12px 16px', borderRadius: '0 8px 8px 0' }}>Dinner</th>
+                <tr style={{ background: '#eff5ed', color: '#2f785b' }}>
+                  <th style={{ padding: '12px 14px', borderRadius: '6px 0 0 6px', width: '12%' }}>Day</th>
+                  <th style={{ padding: '12px 14px', width: '22%' }}>🍳 Breakfast</th>
+                  <th style={{ padding: '12px 14px', width: '24%' }}>🍛 Lunch</th>
+                  <th style={{ padding: '12px 14px', width: '18%' }}>☕ Hi Tea</th>
+                  <th style={{ padding: '12px 14px', borderRadius: '0 6px 6px 0', width: '24%' }}>🍽️ Dinner</th>
                 </tr>
               </thead>
               <tbody>
-                {DEMO_WEEKLY_MENU.map((item, idx) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid var(--border-light)' }}>
-                    <td style={{ padding: '14px 16px', fontWeight: 700 }}>
-                      {item.day} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>({item.date})</span>
-                    </td>
-                    <td style={{ padding: '14px 16px' }}>{item.breakfast}</td>
-                    <td style={{ padding: '14px 16px' }}>{item.lunch}</td>
-                    <td style={{ padding: '14px 16px' }}>{item.dinner}</td>
-                  </tr>
-                ))}
+                {DAYS_CONFIG.map((day) => {
+                  const dayData = fullWeekDays[day] || {};
+                  const getMealText = (mealId) => {
+                    const categories = dayData[mealId] || [];
+                    const names = categories.flatMap((c) => c.items.map((i) => i.name)).filter(Boolean);
+                    return names.slice(0, 3).join(', ') || 'Planned';
+                  };
+
+                  return (
+                    <tr key={day} style={{ borderBottom: '1px solid #edf1eb' }}>
+                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#2b3f33' }}>{day}</td>
+                      <td style={{ padding: '12px 14px', color: '#44564c' }}>{getMealText('breakfast')}</td>
+                      <td style={{ padding: '12px 14px', color: '#44564c' }}>{getMealText('lunch')}</td>
+                      <td style={{ padding: '12px 14px', color: '#44564c' }}>{getMealText('highTea')}</td>
+                      <td style={{ padding: '12px 14px', color: '#44564c' }}>{getMealText('dinner')}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -167,92 +223,227 @@ export default function StudentDashboardPreview({ onRateFoodClick }) {
 
       {/* 3. MENU VOTING TAB */}
       {activeTab === 'voting' && (
-        <div className="card">
-          <h2 className="card-title" style={{ marginBottom: '6px' }}>Vote for Next Week's Breakfast Special</h2>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '20px' }}>
-            Voting closes on Sunday at 11:59 PM. Choose your top preference.
-          </p>
-
-          {hasVoted && (
-            <div className="alert-box success" style={{ marginBottom: '20px' }}>
-              <span>✓ Your vote has been recorded! Thank you for participating.</span>
-            </div>
-          )}
-
-          <form onSubmit={handleVote}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              {votes.map((option) => (
-                <label
-                  key={option.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '14px',
-                    padding: '16px 20px',
-                    borderRadius: 'var(--radius-md)',
-                    border: `2px solid ${selectedOption === option.id ? 'var(--primary-green)' : 'var(--border-light)'}`,
-                    background: selectedOption === option.id ? 'var(--bg-sage-subtle)' : 'var(--bg-surface)',
-                    cursor: hasVoted ? 'default' : 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <input
-                    type="radio"
-                    name="menu_vote"
-                    checked={selectedOption === option.id}
-                    onChange={() => !hasVoted && setSelectedOption(option.id)}
-                    disabled={hasVoted}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-main)' }}>{option.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px' }}>
-                      {option.votes} student votes {option.leading && '🔥 Leading'}
-                    </div>
-                  </div>
-                </label>
-              ))}
+        <div className="card" style={{ background: '#fff', border: '1px solid #e6eae3', borderRadius: '9px', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+            <div>
+              <h2 className="card-title" style={{ margin: '0 0 4px', fontSize: '18px', color: '#273b30' }}>
+                Vote for Menu Dishes
+              </h2>
+              <p style={{ fontSize: '0.82rem', color: '#7a8c81', margin: 0 }}>
+                Pick a day and meal time below to choose your favorite dish. Your votes decide next week's menu!
+              </p>
             </div>
 
-            {!hasVoted && (
-              <button type="submit" className="btn-primary">
-                Submit Vote
+            {onNavigateToVoting && (
+              <button
+                className="button button-secondary"
+                onClick={onNavigateToVoting}
+                style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}
+              >
+                <Trophy size={14} style={{ color: '#b45309' }} /> View Live Results Board →
               </button>
             )}
-          </form>
+          </div>
+
+          {/* Day Selector Pills */}
+          <div style={{ marginBottom: '14px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: '#7a8c81', display: 'block', marginBottom: '6px' }}>
+              STEP 1: SELECT DAY OF WEEK
+            </span>
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {DAYS_CONFIG.map((day) => (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => {
+                    setSelectedVoteDay(day);
+                    setSelectedOptionId(null);
+                  }}
+                  className={`pill-filter-btn ${selectedVoteDay === day ? 'active' : ''}`}
+                >
+                  {day}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Meal Selector Pills */}
+          <div style={{ marginBottom: '22px' }}>
+            <span style={{ fontSize: '10px', fontWeight: 700, color: '#7a8c81', display: 'block', marginBottom: '6px' }}>
+              STEP 2: SELECT MEAL TIME
+            </span>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {MEALS_CONFIG.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedVoteMeal(m.id);
+                    setSelectedOptionId(null);
+                  }}
+                  className={`pill-filter-btn ${selectedVoteMeal === m.id ? 'active' : ''}`}
+                >
+                  <span style={{ marginRight: '4px' }}>{m.icon}</span>
+                  {m.label} ({m.time})
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Voting Box */}
+          <div style={{ background: '#fafbf9', border: '1px solid #e7ebe4', borderRadius: '8px', padding: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ fontSize: '1.2rem' }}>
+                  {MEALS_CONFIG.find((m) => m.id === selectedVoteMeal)?.icon}
+                </span>
+                <strong style={{ fontSize: '13px', color: '#273b30' }}>
+                  {selectedVoteDay} — {MEALS_CONFIG.find((m) => m.id === selectedVoteMeal)?.label} Ballot
+                </strong>
+              </div>
+              <span style={{ fontSize: '11px', color: '#798b80', fontWeight: 600 }}>
+                {totalVotesInSlot} total votes cast
+              </span>
+            </div>
+
+            {hasVotedThisSlot && (
+              <div
+                style={{
+                  background: '#eaf4eb',
+                  border: '1px solid #c8decb',
+                  color: '#286348',
+                  borderRadius: '6px',
+                  padding: '10px 14px',
+                  marginBottom: '16px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <CheckCircle2 size={16} />
+                <span>Your vote for this meal slot has been recorded! Thank you for participating.</span>
+              </div>
+            )}
+
+            <form onSubmit={handleVoteSubmit}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+                {candidates.map((option) => {
+                  const percentage = totalVotesInSlot > 0 ? Math.round((option.votes / totalVotesInSlot) * 100) : 0;
+                  const isSelected = selectedOptionId === option.id;
+
+                  return (
+                    <label
+                      key={option.id}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        padding: '14px 16px',
+                        borderRadius: '8px',
+                        border: `2px solid ${isSelected ? '#2f785b' : '#e0e7df'}`,
+                        background: isSelected ? '#eff6ef' : '#ffffff',
+                        cursor: hasVotedThisSlot ? 'default' : 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <input
+                          type="radio"
+                          name="student_menu_vote"
+                          value={option.id}
+                          checked={isSelected || userVotedSlots[currentSlotKey] === option.id}
+                          onChange={() => !hasVotedThisSlot && setSelectedOptionId(option.id)}
+                          disabled={hasVotedThisSlot}
+                          style={{ accentColor: '#2f785b', width: '16px', height: '16px' }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 700, fontSize: '13px', color: '#273b30' }}>
+                            {option.name}
+                          </div>
+                          <div style={{ fontSize: '10px', color: '#7a8c81', marginTop: '2px' }}>
+                            {option.votes} student votes {option.leading && '🔥 Leading'}
+                          </div>
+                        </div>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#2f785b' }}>
+                          {percentage}%
+                        </span>
+                      </div>
+
+                      {/* Vote Share mini-bar */}
+                      <div style={{ height: '5px', background: '#e9eee8', borderRadius: '999px', overflow: 'hidden' }}>
+                        <div
+                          style={{
+                            width: `${percentage}%`,
+                            height: '100%',
+                            background: option.leading ? '#2f785b' : '#8ea797',
+                            borderRadius: '999px',
+                          }}
+                        />
+                      </div>
+                    </label>
+                  );
+                })}
+
+                {candidates.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '24px', color: '#88988e', fontSize: '12px', gridColumn: '1 / -1' }}>
+                    No dishes are open for voting for this meal slot yet.
+                  </div>
+                )}
+              </div>
+
+              {!hasVotedThisSlot && candidates.length > 0 && (
+                <button
+                  type="submit"
+                  disabled={!selectedOptionId}
+                  className="button button-primary"
+                  style={{
+                    padding: '9px 20px',
+                    fontSize: '11.5px',
+                    opacity: selectedOptionId ? 1 : 0.6,
+                    cursor: selectedOptionId ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  <Vote size={15} /> Submit My Vote
+                </button>
+              )}
+            </form>
+          </div>
         </div>
       )}
 
       {/* 4. PROFILE TAB */}
       {activeTab === 'profile' && (
-        <div className="card" style={{ maxWidth: '600px' }}>
-          <h2 className="card-title" style={{ marginBottom: '18px' }}>Student Profile</h2>
+        <div className="card" style={{ maxWidth: '600px', background: '#fff', border: '1px solid #e6eae3', borderRadius: '9px', padding: '24px' }}>
+          <h2 className="card-title" style={{ marginBottom: '18px', fontSize: '18px', color: '#273b30' }}>Student Profile</h2>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
-            <div className="avatar-circle" style={{ width: '64px', height: '64px', fontSize: '1.8rem' }}>
+            <div className="avatar-circle" style={{ width: '60px', height: '60px', fontSize: '1.6rem', background: '#2f785b', color: '#fff', borderRadius: '50%', display: 'grid', placeItems: 'center' }}>
               A
             </div>
             <div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{DEMO_STUDENT.student_name}</h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>{DEMO_STUDENT.year} • Computer Science</p>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px', color: '#273b30' }}>{DEMO_STUDENT.student_name}</h3>
+              <p style={{ color: '#7a8c81', fontSize: '0.85rem', margin: 0 }}>{DEMO_STUDENT.year} • Computer Science</p>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: 'var(--bg-soft-cream)', padding: '20px', borderRadius: 'var(--radius-md)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f8faf7', padding: '18px', borderRadius: '8px', border: '1px solid #e9ede7' }}>
             <div>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Roll Number</span>
-              <div style={{ fontWeight: 700, marginTop: '2px' }}>{DEMO_STUDENT.student_id}</div>
+              <span style={{ fontSize: '0.75rem', color: '#7a8c81', fontWeight: 600 }}>Roll Number</span>
+              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{DEMO_STUDENT.student_id}</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Email Address</span>
-              <div style={{ fontWeight: 700, marginTop: '2px' }}>{DEMO_STUDENT.email}</div>
+              <span style={{ fontSize: '0.75rem', color: '#7a8c81', fontWeight: 600 }}>Email Address</span>
+              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{DEMO_STUDENT.email}</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Hostel Block</span>
-              <div style={{ fontWeight: 700, marginTop: '2px' }}>{DEMO_STUDENT.hostel_block}</div>
+              <span style={{ fontSize: '0.75rem', color: '#7a8c81', fontWeight: 600 }}>Hostel Block</span>
+              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{DEMO_STUDENT.hostel_block}</div>
             </div>
             <div>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>Room Number</span>
-              <div style={{ fontWeight: 700, marginTop: '2px' }}>{DEMO_STUDENT.room_no}</div>
+              <span style={{ fontSize: '0.75rem', color: '#7a8c81', fontWeight: 600 }}>Room Number</span>
+              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{DEMO_STUDENT.room_no}</div>
             </div>
           </div>
         </div>
