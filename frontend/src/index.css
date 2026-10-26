@@ -12,6 +12,18 @@
 	--line: #e5e9e2;
 	--paper: #fff;
 	--canvas: #f6f7f2;
+	--primary-green: #2f785b;
+	--primary-border: #92c2a7;
+	--bg-sage-light: #eff5ed;
+	--bg-sage-subtle: #f2f7f1;
+	--bg-soft-cream: #fbfbf9;
+	--bg-surface: #ffffff;
+	--border-light: #e2e8e0;
+	--text-main: #24332d;
+	--text-muted: #6a7c72;
+	--text-subtle: #8a968f;
+	--radius-full: 9999px;
+	--radius-md: 8px;
 }
 
 * { box-sizing: border-box; }
