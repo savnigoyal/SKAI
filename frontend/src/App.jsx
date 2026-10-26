@@ -137,10 +137,39 @@ function App() {
   const [editingMeal, setEditingMeal] = useState(null);
   const [mealDraft, setMealDraft] = useState(null);
   const [notice, setNotice] = useState(null);
-  const [activeNav, setActiveNav] = useState('Weekly Menu');
+  const [activeNav, setActiveNav] = useState(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes('weekly')) return 'Weekly Menu';
+      if (hash.includes('item') || hash.includes('dish')) return 'Menu Items';
+      if (hash.includes('vot') || hash.includes('poll')) return 'Voting Results';
+      if (hash.includes('student')) return 'Student Dashboard';
+      if (hash.includes('analytics')) return 'Quality Analytics';
+      if (hash.includes('review')) return 'Student Food Reviews';
+      if (hash.includes('manager')) return 'Manager Overview';
+      if (hash.includes('rate')) return "Rate Today's Food";
+    }
+    return 'Weekly Menu';
+  });
   const [publishConfirm, setPublishConfirm] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(true);
+
+  useEffect(() => {
+    function onHashChange() {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes('weekly')) setActiveNav('Weekly Menu');
+      else if (hash.includes('item') || hash.includes('dish')) setActiveNav('Menu Items');
+      else if (hash.includes('vot') || hash.includes('poll')) setActiveNav('Voting Results');
+      else if (hash.includes('student')) setActiveNav('Student Dashboard');
+      else if (hash.includes('analytics')) setActiveNav('Quality Analytics');
+      else if (hash.includes('review')) setActiveNav('Student Food Reviews');
+      else if (hash.includes('manager')) setActiveNav('Manager Overview');
+      else if (hash.includes('rate')) setActiveNav("Rate Today's Food");
+    }
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   const weekId = dateKey(weekStart);
   const currentMenu = menus[weekId] || makeWeek(weekStart);

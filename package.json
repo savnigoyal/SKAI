@@ -5,7 +5,7 @@
   "description": "SKAI Hostel Mess Management System - Food Reviews, Menu Planning, Polls, Inventory & Food Waste Analytics",
   "type": "commonjs",
   "engines": {
-    "node": "24.x"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "start": "node server.js",
