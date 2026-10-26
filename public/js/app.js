@@ -47,7 +47,7 @@ const app = {
   // 1. Analytics & Summary
   loadSummary: async function() {
     try {
-      const res = await fetch('/api/analytics/summary');
+      const res = await fetch('api/analytics/summary');
       const json = await res.json();
       if (!json.success) return;
 
@@ -170,7 +170,7 @@ const app = {
   // 2. Inventory Operations
   loadInventory: async function() {
     try {
-      const res = await fetch('/api/inventory');
+      const res = await fetch('api/inventory');
       const json = await res.json();
       if (json.success) {
         this.inventoryData = json.data;
@@ -277,13 +277,13 @@ const app = {
     try {
       let res;
       if (id) {
-        res = await fetch(`/api/inventory/${id}`, {
+        res = await fetch(`api/inventory/${id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
       } else {
-        res = await fetch('/api/inventory', {
+        res = await fetch('api/inventory', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -324,7 +324,7 @@ const app = {
     const reason = document.getElementById('adjust-reason').value.trim();
 
     try {
-      const res = await fetch(`/api/inventory/${id}/adjust`, {
+      const res = await fetch(`api/inventory/${id}/adjust`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ change_type, quantity, reason })
@@ -347,7 +347,7 @@ const app = {
     if (!confirm(`Are you sure you want to remove '${name}' from inventory?`)) return;
 
     try {
-      const res = await fetch(`/api/inventory/${id}`, { method: 'DELETE' });
+      const res = await fetch(`api/inventory/${id}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) {
         this.showToast(`Item '${name}' deleted`, 'success');
@@ -364,7 +364,7 @@ const app = {
   loadWasteRecords: async function() {
     try {
       const meal = document.getElementById('waste-meal-filter').value;
-      let url = '/api/waste';
+      let url = 'api/waste';
       if (meal && meal !== 'ALL') {
         url += `?meal_type=${encodeURIComponent(meal)}`;
       }
@@ -424,7 +424,7 @@ const app = {
     };
 
     try {
-      const res = await fetch('/api/waste', {
+      const res = await fetch('api/waste', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -446,7 +446,7 @@ const app = {
   deleteWasteRecord: async function(id) {
     if (!confirm('Are you sure you want to remove this waste record?')) return;
     try {
-      const res = await fetch(`/api/waste/${id}`, { method: 'DELETE' });
+      const res = await fetch(`api/waste/${id}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) {
         this.showToast('Waste record removed', 'success');
@@ -490,7 +490,7 @@ const app = {
   // 4. Stock Movements Audit
   loadMovements: async function() {
     try {
-      const res = await fetch('/api/inventory-movements?limit=30');
+      const res = await fetch('api/inventory-movements?limit=30');
       const json = await res.json();
       if (json.success) {
         this.movementsData = json.data;

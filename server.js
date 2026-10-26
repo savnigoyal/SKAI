@@ -245,7 +245,7 @@ app.use((req, res) => {
 });
 
 // Start server if not imported by test
-if (process.env.NODE_ENV !== 'test') {
+if (require.main === module && process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`=======================================================`);
     console.log(`🏨 Hostel Mess Management System`);
