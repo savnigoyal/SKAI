@@ -738,7 +738,7 @@ async function handleLogout() {
                 </span>
               </div>
 
-              {/* Meals Grid (Breakfast, Lunch, High Tea, Dinner) */}
+              {/* Meals Grid (Breakfast, Lunch, Hi Tea, Dinner) */}
               <div className="meal-grid">
                 {MEALS.map((meal) => {
                   const leadingCandidate = votingData?.[selectedDay]?.[meal.id]?.find((c) => c.leading);
