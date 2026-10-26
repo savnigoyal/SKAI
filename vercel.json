@@ -1,12 +1,11 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "framework": null,
-  "installCommand": "npm install && npm install --prefix frontend",
   "buildCommand": "npm run build",
   "outputDirectory": "frontend/dist",
   "rewrites": [
     { "source": "/inventory/api/:path*", "destination": "/api/inventory" },
-    { "source": "/inventory", "destination": "/inventory/index.html" }
+    { "source": "/inventory", "destination": "/inventory/index.html" },
+    { "source": "/((?!assets|inventory|api).*)", "destination": "/index.html" }
   ],
   "headers": [
     {

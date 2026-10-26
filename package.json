@@ -13,7 +13,7 @@
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "npm run dev --prefix backend",
     "dev:inventory": "node server.js",
-    "build": "npm install --prefix frontend && npm run build --prefix frontend && node scripts/copy-inventory.js",
+    "build": "npm --prefix frontend install && npm --prefix frontend run build && node scripts/copy-inventory.js",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
