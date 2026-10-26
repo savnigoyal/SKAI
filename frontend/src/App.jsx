@@ -1,3 +1,6 @@
+
+import Login from './pages/Login';
+import { getCurrentUser, logout } from './services/authService';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
@@ -29,6 +32,7 @@ import ManagerDashboardPreview from './components/ManagerDashboardPreview';
 import MenuItems from './pages/MenuItems';
 import VotingResults from './pages/VotingResults';
 import InventoryWaste from './pages/InventoryWaste';
+import StudentVoting from './pages/StudentVoting';
 import { DEMO_STUDENT } from './services/mockData';
 import {
   MEALS_CONFIG,
@@ -62,6 +66,7 @@ const NAV_ITEMS = [
   { label: "Rate Today's Food", icon: Coffee, testId: 'nav-rate-food' },
   { label: 'Student Dashboard', icon: LayoutDashboard, testId: 'nav-student-dashboard' },
   { label: 'Weekly Menu', icon: CalendarDays },
+  { label: 'Student Voting', icon: Vote, testId: 'nav-student-voting' },
   { label: 'Quality Analytics', icon: LayoutDashboard, testId: 'nav-analytics' },
   { label: 'Student Food Reviews', icon: FilePenLine, testId: 'nav-manager-reviews' },
   { label: 'Manager Overview', icon: LayoutDashboard, testId: 'nav-manager-dashboard' },
@@ -129,6 +134,33 @@ function getMealCompletion(meal) {
 }
 
 function App() {
+    const [authUser, setAuthUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getCurrentUser()
+      .then((user) => {
+        if (!cancelled) {
+          setAuthUser(user);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAuthUser(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setAuthChecked(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const [weekStart, setWeekStart] = useState(() => mondayOf(new Date()));
   const [menus, setMenus] = useState(loadMenus);
   const [catalog, setCatalog] = useState(loadMasterMenuItems);
@@ -461,14 +493,78 @@ function App() {
     setNotice({ type: 'info', text: 'Voting benchmarks have been restored.' });
   }
 
-  function handleNav(label, soon) {
-    if (soon) {
-      setNotice({ type: 'info', text: `${label} will be available in a later phase.` });
-      return;
-    }
-    setActiveNav(label);
+
+function handleNav(label, soon) {
+  if (soon) {
+    setNotice({
+      type: 'info',
+      text: `${label} will be available in a later phase.`,
+    });
+    return;
   }
 
+  setActiveNav(label);
+}
+
+async function handleLogout() {
+  try {
+    await logout();
+    setAuthUser(null);
+    setActiveNav('Student Dashboard');
+  } catch (error) {
+    console.error('Logout failed:', error);
+    alert('Unable to log out. Please try again.');
+  }
+}
+
+
+  const visibleNavItems = NAV_ITEMS
+  .filter(({ label }) => {
+    if (authUser?.role === "student") {
+      return [
+        "Student Dashboard",
+        "Weekly Menu",
+        "Student Voting",
+        "Rate Today's Food",
+      ].includes(label);
+    }
+
+    return [
+      "Manager Overview",
+      "Weekly Menu",
+      "Menu Items",
+      "Voting Results",
+      "Student Food Reviews",
+      "Quality Analytics",
+      "Inventory & Waste",
+      "Settings",
+    ].includes(label);
+  })
+  .map((item) => ({
+    ...item,
+    target:
+      authUser?.role === "student" && item.label === "Weekly Menu"
+        ? "Student Weekly Menu"
+        : item.label,
+  }));
+  if (!authChecked) {
+    return <div>Checking your session...</div>;
+  }
+
+  if (!authUser) {
+    return (
+      <Login
+        onLoginSuccess={(user) => {
+          setAuthUser(user);
+          setActiveNav(
+            user.role === "student"
+              ? "Student Dashboard"
+              : "Manager Overview"
+          );
+        }}
+      />
+    );
+  }
   return (
     <div className="app-shell">
       {/* Sidebar Navigation */}
@@ -491,7 +587,7 @@ function App() {
 
         <div className="nav-label">WORKSPACE</div>
         <nav aria-label="Main navigation">
-          {NAV_ITEMS.map(({ label, icon: Icon, soon, testId, href }) =>
+          {visibleNavItems.map(({ label, icon: Icon, soon, testId, href, target }) => (
             href ? (
               <a className="nav-item" key={label} data-testid={testId} href={href}>
                 <Icon size={18} strokeWidth={1.8} />
@@ -503,7 +599,7 @@ function App() {
                 key={label}
                 data-testid={testId}
                 onClick={() => {
-                  handleNav(label, soon);
+                  handleNav(target || label, soon);
                   setMobileNavOpen(false);
                 }}
               >
@@ -512,14 +608,34 @@ function App() {
                 {soon && <span className="soon-tag">SOON</span>}
               </button>
             )
-          )}
+          ))}
         </nav>
+        <button
+          type="button"
+          className="nav-item"
+          onClick={handleLogout}
+          style={{ marginTop: '12px' }}
+        >
+          <span>Log out</span>
+        </button>
 
-        <div className="sidebar-bottom">
-          <span className="manager-avatar">M</span>
-          <span className="manager-meta"><strong>Mess Manager</strong><small>Administrator</small></span>
-          <ChevronDown size={16} />
-        </div>
+
+<div className="sidebar-bottom">
+  <span className="manager-avatar">
+    {(authUser?.name || 'U').charAt(0).toUpperCase()}
+  </span>
+  <span className="manager-meta">
+    <strong>
+      {authUser?.name ||
+        (authUser?.role === 'student' ? 'Student' : 'Mess Manager')}
+    </strong>
+    <small>
+      {authUser?.role === 'student' ? 'Student' : 'Administrator'}
+    </small>
+  </span>
+  <ChevronDown size={16} />
+</div>
+
       </aside>
 
       {/* Main Container */}
@@ -645,6 +761,58 @@ function App() {
           </>
         )}
 
+{/* Student Weekly Menu — read-only */}
+{activeNav === 'Student Weekly Menu' && (
+  <div className="student-weekly-menu">
+    <section className="page-heading">
+      <div>
+        <div className="eyebrow">STUDENT MENU</div>
+        <h1>Weekly Mess Menu</h1>
+        <p>View the planned meals for each day of the week.</p>
+      </div>
+      <div className={`status-pill ${isPublished ? 'published' : 'draft'}`}>
+        <span />
+        {isPublished ? 'Published' : 'Draft'}
+      </div>
+    </section>
+
+    {DAYS.map((day) => (
+      <section key={day} className="menu-section" style={{ marginBottom: '18px' }}>
+        <h2>{day}</h2>
+        <div className="meal-grid">
+          {MEALS.map((meal) => {
+            const categories = currentMenu.days?.[day]?.[meal.id] || [];
+            const items = categories.flatMap((category) =>
+              (category.items || [])
+                .filter((item) => item.name?.trim())
+                .map((item) => item.name)
+            );
+
+            return (
+              <article className="meal-card" key={meal.id}>
+                <div className="meal-title-row">
+                  <h4>{meal.label}</h4>
+                  <span className="meal-time">{meal.time}</span>
+                </div>
+
+                {items.length > 0 ? (
+                  <ul>
+                    {items.map((name, index) => (
+                      <li key={`${name}-${index}`}>{name}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No menu items available yet.</p>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+  </div>
+)}
+
         {/* 2. MENU ITEMS CATALOG TAB */}
         {activeNav === 'Menu Items' && (
           <MenuItems
@@ -685,6 +853,10 @@ function App() {
             currentWeekMenu={currentMenu}
           />
         )}
+        {/* Student Voting */}
+{activeNav === 'Student Voting' && (
+  <StudentVoting isDemoMode={isDemoMode} />
+)}
 
         {/* 7. QUALITY ANALYTICS */}
         {activeNav === 'Quality Analytics' && <QualityAnalytics isDemoMode={isDemoMode} />}
