@@ -1,7 +1,8 @@
 const { DatabaseSync } = require('node:sqlite');
 const path = require('node:path');
 
-const dbPath = path.join(__dirname, 'mess_data.db');
+// Vercel functions can only write to /tmp, so the hosted demo uses a fresh seeded copy there.
+const dbPath = process.env.VERCEL ? '/tmp/mess_data.db' : path.join(__dirname, 'mess_data.db');
 const db = new DatabaseSync(dbPath);
 
 // Enable foreign keys

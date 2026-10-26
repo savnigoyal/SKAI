@@ -29,7 +29,7 @@ button:focus-visible, input:focus-visible { outline: 3px solid #92c2a7; outline-
 .brand small { margin-top: 3px; color: #a4b7ad; font-size: 9px; font-weight: 700; letter-spacing: 1px; }
 .nav-label { padding: 0 11px 11px; color: #92a89d; font-size: 9px; font-weight: 700; letter-spacing: 1.1px; }
 .sidebar nav { display: grid; gap: 5px; }
-.nav-item { display: flex; min-height: 43px; align-items: center; gap: 12px; padding: 0 11px; border: 0; border-radius: 7px; color: #c6d3cc; background: transparent; cursor: pointer; text-align: left; font-size: 12px; font-weight: 550; }
+.nav-item { text-decoration: none; display: flex; min-height: 43px; align-items: center; gap: 12px; padding: 0 11px; border: 0; border-radius: 7px; color: #c6d3cc; background: transparent; cursor: pointer; text-align: left; font-size: 12px; font-weight: 550; }
 .nav-item:hover { color: #fff; background: #ffffff0d; }
 .nav-item.active { color: #fff; background: #ffffff18; box-shadow: inset 3px 0 #8dc6a1; }
 .nav-item.active svg { color: #b8d8c3; }

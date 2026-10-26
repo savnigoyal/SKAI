@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Leaf,
   Menu as MenuIcon,
+  Package,
   Plus,
   Settings,
   Utensils,
@@ -52,6 +53,7 @@ const NAV_ITEMS = [
   { label: 'Quality Analytics', icon: LayoutDashboard, testId: 'nav-analytics' },
   { label: 'Student Food Reviews', icon: FilePenLine, testId: 'nav-manager-reviews' },
   { label: 'Manager Overview', icon: LayoutDashboard, testId: 'nav-manager-dashboard' },
+  { label: 'Inventory & Waste', icon: Package, testId: 'nav-inventory', href: '/inventory/' },
   { label: 'Menu Items', icon: Utensils, soon: true },
   { label: 'Voting Results', icon: CircleHelp, soon: true },
   { label: 'Settings', icon: Settings, soon: true },
@@ -236,7 +238,12 @@ function App() {
         </button>
         <div className="nav-label">WORKSPACE</div>
         <nav aria-label="Main navigation">
-          {NAV_ITEMS.map(({ label, icon: Icon, soon, testId }) => (
+          {NAV_ITEMS.map(({ label, icon: Icon, soon, testId, href }) => href ? (
+            <a className="nav-item" key={label} data-testid={testId} href={href}>
+              <Icon size={18} strokeWidth={1.8} />
+              <span>{label}</span>
+            </a>
+          ) : (
             <button className={`nav-item ${activeNav === label ? 'active' : ''}`} key={label} data-testid={testId} onClick={() => { handleNav(label, soon); setMobileNavOpen(false); }}>
               <Icon size={18} strokeWidth={1.8} />
               <span>{label}</span>

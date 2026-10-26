@@ -1,10 +1,10 @@
-<<<<<<< HEAD
+# Node
 node_modules/
 playwright-report/
 test-results/
-.env
 mess_data.db-journal
-=======
+.vercel
+
 # Python
 __pycache__/
 *.py[cod]
@@ -20,4 +20,3 @@ instance/
 .vscode/
 .DS_Store
 Thumbs.db
->>>>>>> d348c6f17605b7a27ebf34c05749081309c0ea3c
