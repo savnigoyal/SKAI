@@ -761,6 +761,58 @@ async function handleLogout() {
           </>
         )}
 
+{/* Student Weekly Menu — read-only */}
+{activeNav === 'Student Weekly Menu' && (
+  <div className="student-weekly-menu">
+    <section className="page-heading">
+      <div>
+        <div className="eyebrow">STUDENT MENU</div>
+        <h1>Weekly Mess Menu</h1>
+        <p>View the planned meals for each day of the week.</p>
+      </div>
+      <div className={`status-pill ${isPublished ? 'published' : 'draft'}`}>
+        <span />
+        {isPublished ? 'Published' : 'Draft'}
+      </div>
+    </section>
+
+    {DAYS.map((day) => (
+      <section key={day} className="menu-section" style={{ marginBottom: '18px' }}>
+        <h2>{day}</h2>
+        <div className="meal-grid">
+          {MEALS.map((meal) => {
+            const categories = currentMenu.days?.[day]?.[meal.id] || [];
+            const items = categories.flatMap((category) =>
+              (category.items || [])
+                .filter((item) => item.name?.trim())
+                .map((item) => item.name)
+            );
+
+            return (
+              <article className="meal-card" key={meal.id}>
+                <div className="meal-title-row">
+                  <h4>{meal.label}</h4>
+                  <span className="meal-time">{meal.time}</span>
+                </div>
+
+                {items.length > 0 ? (
+                  <ul>
+                    {items.map((name, index) => (
+                      <li key={`${name}-${index}`}>{name}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No menu items available yet.</p>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    ))}
+  </div>
+)}
+
         {/* 2. MENU ITEMS CATALOG TAB */}
         {activeNav === 'Menu Items' && (
           <MenuItems
@@ -801,6 +853,10 @@ async function handleLogout() {
             currentWeekMenu={currentMenu}
           />
         )}
+        {/* Student Voting */}
+{activeNav === 'Student Voting' && (
+  <StudentVoting isDemoMode={isDemoMode} />
+)}
 
         {/* 7. QUALITY ANALYTICS */}
         {activeNav === 'Quality Analytics' && <QualityAnalytics isDemoMode={isDemoMode} />}
