@@ -33,13 +33,34 @@ export async function login({ identifier, password, role }) {
 }
 
 // Register a student account. The server always assigns the student role.
-export async function registerStudent({ full_name, student_id, email, hostel_block, room_no, password }) {
+
+export async function registerStudent({
+  full_name,
+  student_id,
+  email,
+  hostel_block,
+  room_no,
+  year,
+  department,
+  password,
+}) {
   const result = await apiRequest("/api/auth/register", {
     method: "POST",
-    body: { full_name, student_id, email, hostel_block, room_no, password },
+    body: {
+      full_name,
+      student_id,
+      email,
+      hostel_block,
+      room_no,
+      year,
+      department,
+      password,
+    },
   });
+
   return result.user;
 }
+
 
 // Request password recovery. In local development the API may return a local-only reset URL.
 export async function requestPasswordReset(email) {
