@@ -263,6 +263,9 @@ function App() {
     [currentMenu]
   );
   const isPublished = currentMenu.published;
+  const currentStudent = authUser
+    ? { ...authUser, student_name: authUser.name }
+    : DEMO_STUDENT;
 
   function updateWeek(nextMenu) {
     setMenus((previous) => ({ ...previous, [weekId]: nextMenu }));
@@ -553,7 +556,8 @@ async function handleLogout() {
     return <div>Checking your session...</div>;
   }
 
-  if (!authUser) {
+  const hasResetToken = new URLSearchParams(window.location.search).has('reset_token');
+  if (!authUser || hasResetToken) {
     return (
       <Login
         onLoginSuccess={(user) => {
@@ -843,11 +847,12 @@ async function handleLogout() {
         {activeNav === 'Inventory & Waste' && <InventoryWaste />}
 
         {/* 5. RATE FOOD TAB */}
-        {activeNav === "Rate Today's Food" && <FoodReview student={DEMO_STUDENT} />}
+        {activeNav === "Rate Today's Food" && <FoodReview student={currentStudent} />}
 
         {/* 6. STUDENT DASHBOARD */}
         {activeNav === 'Student Dashboard' && (
           <StudentDashboardPreview
+            student={currentStudent}
             onRateFoodClick={() => setActiveNav("Rate Today's Food")}
             votingData={votingData}
             onCastVote={handleCastVote}
@@ -857,7 +862,7 @@ async function handleLogout() {
         )}
         {/* Student Voting */}
 {activeNav === 'Student Voting' && (
-  <StudentVoting isDemoMode={isDemoMode} />
+  <StudentVoting student={currentStudent} isDemoMode={isDemoMode} />
 )}
 
         {/* 7. QUALITY ANALYTICS */}

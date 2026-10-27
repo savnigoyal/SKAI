@@ -9,6 +9,7 @@ export default function StudentDashboardPreview({
   onCastVote,
   onNavigateToVoting,
   currentWeekMenu,
+  student,
 }) {
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'weekly' | 'voting' | 'profile'
   const [selectedVoteDay, setSelectedVoteDay] = useState('Monday');
@@ -34,13 +35,23 @@ export default function StudentDashboardPreview({
 
   // 7-day schedule for table
   const fullWeekDays = currentWeekMenu?.days || generateFullWeekSchedule();
+  const profileStudent = {
+    name: student?.name || DEMO_STUDENT.student_name,
+    studentId: student?.student_id || DEMO_STUDENT.student_id,
+    email: student?.email || DEMO_STUDENT.email,
+    hostelBlock: student?.hostel_block || DEMO_STUDENT.hostel_block,
+    roomNo: student?.room_no || DEMO_STUDENT.room_no,
+    year: student?.year || (student?.student_id ? 'Year not provided' : DEMO_STUDENT.year),
+    department: student?.department || (student?.student_id ? 'Department not provided' : 'Computer Science'),
+  };
+  const profileInitial = profileStudent.name.trim().charAt(0).toUpperCase() || 'S';
 
   return (
     <div className="student-dashboard-preview" data-testid="student-dashboard-preview">
       {/* Top Welcome Greeting */}
       <div className="top-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div className="module-header">
-          <h1 style={{ fontSize: '24px', fontWeight: 600, margin: '0 0 6px', color: '#1f3529' }}>Good Morning, {DEMO_STUDENT.student_name.split(' ')[0]}! ☀️</h1>
+          <h1 style={{ fontSize: '24px', fontWeight: 600, margin: '0 0 6px', color: '#1f3529' }}>Good Morning, {profileStudent.name.split(' ')[0]}! ☀️</h1>
           <p style={{ margin: 0, color: '#68776f', fontSize: '12px' }}>Welcome to SKAI Mess Portal. Check upcoming meals, vote for next specials, or review food.</p>
         </div>
 
@@ -50,10 +61,10 @@ export default function StudentDashboardPreview({
             Student Portal
           </span>
           <div className="profile-pill">
-            <div className="avatar-circle">A</div>
+            <div className="avatar-circle">{profileInitial}</div>
             <div className="profile-info">
-              <div className="profile-name">{DEMO_STUDENT.student_name}</div>
-              <div className="profile-role">{DEMO_STUDENT.year}, {DEMO_STUDENT.hostel_block}</div>
+              <div className="profile-name">{profileStudent.name}</div>
+              <div className="profile-role">{profileStudent.year}, {profileStudent.hostelBlock}</div>
             </div>
           </div>
         </div>
@@ -420,30 +431,30 @@ export default function StudentDashboardPreview({
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '24px' }}>
             <div className="avatar-circle" style={{ width: '60px', height: '60px', fontSize: '1.6rem', background: '#2f785b', color: '#fff', borderRadius: '50%', display: 'grid', placeItems: 'center' }}>
-              A
+              {profileInitial}
             </div>
             <div>
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px', color: '#273b30' }}>{DEMO_STUDENT.student_name}</h3>
-              <p style={{ color: '#7a8c81', fontSize: '0.85rem', margin: 0 }}>{DEMO_STUDENT.year} • Computer Science</p>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 4px', color: '#273b30' }}>{profileStudent.name}</h3>
+              <p style={{ color: '#7a8c81', fontSize: '0.85rem', margin: 0 }}>{profileStudent.year} • {profileStudent.department}</p>
             </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#f8faf7', padding: '18px', borderRadius: '8px', border: '1px solid #e9ede7' }}>
             <div>
               <span style={{ fontSize: '0.75rem', color: '#7a8c81', fontWeight: 600 }}>Roll Number</span>
-              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{DEMO_STUDENT.student_id}</div>
+              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{profileStudent.studentId}</div>
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: '#7a8c81', fontWeight: 600 }}>Email Address</span>
-              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{DEMO_STUDENT.email}</div>
+              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{profileStudent.email}</div>
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: '#7a8c81', fontWeight: 600 }}>Hostel Block</span>
-              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{DEMO_STUDENT.hostel_block}</div>
+              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{profileStudent.hostelBlock}</div>
             </div>
             <div>
               <span style={{ fontSize: '0.75rem', color: '#7a8c81', fontWeight: 600 }}>Room Number</span>
-              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{DEMO_STUDENT.room_no}</div>
+              <div style={{ fontWeight: 700, marginTop: '2px', color: '#273b30' }}>{profileStudent.roomNo}</div>
             </div>
           </div>
         </div>
