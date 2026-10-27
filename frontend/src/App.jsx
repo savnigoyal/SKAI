@@ -70,7 +70,7 @@ const NAV_ITEMS = [
   { label: 'Quality Analytics', icon: LayoutDashboard, testId: 'nav-analytics' },
   { label: 'Student Food Reviews', icon: FilePenLine, testId: 'nav-manager-reviews' },
   { label: 'Manager Overview', icon: LayoutDashboard, testId: 'nav-manager-dashboard' },
-  { label: 'Inventory & Waste', icon: Package, testId: 'nav-inventory', href: '/inventory/' },
+  { label: 'Inventory & Waste', icon: Package, testId: 'nav-inventory' },
   { label: 'Menu Items', icon: Utensils, testId: 'nav-menu-items' },
   { label: 'Voting Results', icon: Vote, testId: 'nav-voting-results' },
   { label: 'Settings', icon: Settings, soon: true },
@@ -180,6 +180,7 @@ function App() {
       if (hash.includes('review')) return 'Student Food Reviews';
       if (hash.includes('manager')) return 'Manager Overview';
       if (hash.includes('rate')) return "Rate Today's Food";
+      if (hash.includes('inventory') || hash.includes('waste')) return 'Inventory & Waste';
     }
     return 'Weekly Menu';
   });
@@ -198,6 +199,7 @@ function App() {
       else if (hash.includes('review')) setActiveNav('Student Food Reviews');
       else if (hash.includes('manager')) setActiveNav('Manager Overview');
       else if (hash.includes('rate')) setActiveNav("Rate Today's Food");
+      else if (hash.includes('inventory') || hash.includes('waste')) setActiveNav('Inventory & Waste');
     }
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);

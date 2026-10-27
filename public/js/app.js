@@ -1,6 +1,8 @@
 // Hostel Mess Management - Inventory & Waste Control Frontend
 // Module Owner: Shatakshi
 
+const API_BASE = (typeof window !== 'undefined' && window.location.port !== '3000' && window.location.hostname === 'localhost') ? 'http://localhost:3000' : '';
+
 const app = {
   inventoryData: [],
   wasteData: [],
