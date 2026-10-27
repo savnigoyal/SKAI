@@ -1584,3 +1584,65 @@ h1, h2, h3, h4, p { margin-top: 0; }
     align-items: stretch;
   }
 }
+
+/* Student registration and password-recovery screens */
+.auth-page--form {
+  place-items: start center;
+  overflow-y: auto;
+  min-height: 100vh;
+}
+.auth-page--form .auth-card {
+  margin: 24px 0;
+}
+.auth-links {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  color: #74848a;
+  font-size: 13px;
+  text-align: center;
+}
+.auth-links p { margin: 0; }
+.auth-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #24796f;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.auth-link:hover { color: #15594f; }
+.auth-message {
+  margin: 0 0 14px;
+  padding: 11px 12px;
+  border: 1px solid #b8deca;
+  border-radius: 9px;
+  background: #f0faf4;
+  color: #216b49;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.auth-card--form .auth-heading { margin-bottom: 20px; }
+.auth-form select {
+  width: 100%;
+  min-height: 48px;
+  box-sizing: border-box;
+  margin: 0 0 19px;
+  padding: 12px 14px;
+  border: 1px solid #dbe4e5;
+  border-radius: 10px;
+  background: #fbfcfc;
+  color: #23383f;
+  font-family: inherit;
+  font-size: 14px;
+}
+.auth-form select:focus {
+  outline: none;
+  border-color: #398d80;
+  box-shadow: 0 0 0 4px rgba(57, 141, 128, 0.11);
+}
